@@ -232,6 +232,42 @@ button:focus-visible {
   max-width: 640px;
 }
 
+.home-page .hero .container {
+  display: flex;
+  justify-content: center;
+}
+
+.home-page .hero-content {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.home-page .hero-brand {
+  display: flex;
+  justify-content: center;
+}
+
+.home-page .hero-brand-logo {
+  margin: 0 auto;
+}
+
+.home-page .hero-actions {
+  justify-content: center;
+}
+
+.home-page .trust-banner {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.home-page .feature-grid,
+.home-page .screenshot-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 300px));
+  justify-content: center;
+}
+
 .hero h1 {
   font-size: clamp(1.75rem, 4vw, 2.5rem);
   line-height: 1.2;
@@ -525,6 +561,10 @@ button:focus-visible {
   font-size: 1rem;
   margin: 0 0 12px;
   color: var(--white);
+}
+
+.footer-brand {
+  margin-bottom: 14px;
 }
 
 .footer-brand-logo-wrap {
