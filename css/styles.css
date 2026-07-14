@@ -223,6 +223,10 @@ button:focus-visible {
   margin-bottom: 24px;
 }
 
+.home-page .brand-logo {
+  height: 72px;
+}
+
 .hero-brand-logo {
   height: clamp(80px, 14vw, 120px);
   width: auto;
@@ -232,28 +236,44 @@ button:focus-visible {
   max-width: 640px;
 }
 
+.home-page .hero {
+  text-align: center;
+}
+
 .home-page .hero .container {
   display: flex;
   justify-content: center;
 }
 
 .home-page .hero-content {
+  width: 100%;
   max-width: 720px;
-  margin: 0 auto;
+  margin-inline: auto;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.home-page .hero h1,
+.home-page .hero .lead {
+  width: 100%;
 }
 
 .home-page .hero-brand {
   display: flex;
   justify-content: center;
+  width: 100%;
 }
 
 .home-page .hero-brand-logo {
-  margin: 0 auto;
+  height: clamp(120px, 21vw, 180px);
+  margin-inline: auto;
 }
 
 .home-page .hero-actions {
   justify-content: center;
+  width: 100%;
 }
 
 .home-page .trust-banner {
@@ -555,30 +575,7 @@ button:focus-visible {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 32px;
   margin-bottom: 32px;
-}
-
-.site-footer h3 {
-  font-size: 1rem;
-  margin: 0 0 12px;
-  color: var(--white);
-}
-
-.footer-brand {
-  margin-bottom: 14px;
-}
-
-.footer-brand-logo-wrap {
-  display: inline-block;
-  background: var(--white);
-  border-radius: 10px;
-  padding: 10px 14px;
-  margin-bottom: 14px;
-}
-
-.footer-brand-logo {
-  height: 56px;
-  width: auto;
-  display: block;
+  text-align: center;
 }
 
 .site-footer p,
@@ -586,16 +583,6 @@ button:focus-visible {
   font-size: 0.875rem;
   line-height: 1.6;
   margin: 0 0 8px;
-}
-
-.footer-links {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.footer-links li {
-  margin-bottom: 8px;
 }
 
 .footer-bottom {
