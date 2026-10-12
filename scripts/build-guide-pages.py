@@ -9,6 +9,39 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 PLAY_STORE = "https://play.google.com/store/apps/details?id=com.jimilpatel.jpfinancelab"
+
+
+def render_site_header(prefix: str = "", current: str | None = None) -> str:
+    def nav_link(href: str, label: str, key: str) -> str:
+        cur = ' aria-current="page"' if current == key else ""
+        return f'<a href="{prefix}{href}"{cur}>{label}</a>'
+
+    return f"""    <header class="site-header">
+      <div class="container site-header__inner">
+        <a href="{prefix}index.html" class="brand" aria-label="MoneyMap Pulse home">
+          <img src="{prefix}assets/logo/moneymap-pulse-logo-transparent-trimmed.png" alt="MoneyMap Pulse" class="brand-logo" width="180" height="72">
+        </a>
+        <button type="button" class="nav-toggle" aria-expanded="false" aria-controls="site-navigation" aria-label="Open navigation menu">
+          <span class="nav-toggle__icon nav-toggle__icon--open" aria-hidden="true">☰</span>
+          <span class="nav-toggle__icon nav-toggle__icon--close" aria-hidden="true">✕</span>
+        </button>
+        <div class="site-header__menu" id="site-navigation">
+          <nav class="nav" aria-label="Main navigation">
+            {nav_link("index.html", "Home", "home")}
+            {nav_link("guides.html", "Guides", "guides")}
+            {nav_link("features.html", "Features", "features")}
+            {nav_link("faq.html", "FAQ", "faq")}
+            {nav_link("privacy.html", "Privacy", "privacy")}
+            {nav_link("contact.html", "Contact", "contact")}
+          </nav>
+          <div class="header-cta">
+            <a href="{PLAY_STORE}" class="button button-primary" rel="noopener noreferrer">Google Play</a>
+          </div>
+        </div>
+      </div>
+    </header>"""
+
+
 FOOTER = (
     "<p>MoneyMap Pulse provides estimates and educational information only. "
     "Results depend on assumptions and should not be considered financial advice.</p>"
@@ -35,24 +68,7 @@ def shell(title: str, meta: str, canonical_slug: str, body: str) -> str:
 <body class="guide-page">
   <div class="page-wrap">
     <a href="#main" class="skip-link">Skip to main content</a>
-    <header class="site-header">
-      <div class="container">
-        <a href="../index.html" class="brand" aria-label="MoneyMap Pulse home">
-          <img src="../assets/logo/moneymap-pulse-logo-transparent-trimmed.png" alt="MoneyMap Pulse" class="brand-logo" width="120" height="48">
-        </a>
-        <nav class="nav" aria-label="Main navigation">
-          <a href="../index.html">Home</a>
-          <a href="../guides.html">Guides</a>
-          <a href="../features.html">Features</a>
-          <a href="../faq.html">FAQ</a>
-          <a href="../privacy.html">Privacy</a>
-          <a href="../contact.html">Contact</a>
-        </nav>
-        <div class="header-cta">
-          <a href="{PLAY_STORE}" class="button button-primary" rel="noopener noreferrer">Google Play</a>
-        </div>
-      </div>
-    </header>
+{render_site_header("../", "guides")}
     <main id="main">
       <header class="page-header">
         <div class="container">

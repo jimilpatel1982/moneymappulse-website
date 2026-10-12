@@ -18,20 +18,26 @@
   <div class="page-wrap">
     <a href="#main" class="skip-link">Skip to main content</a>
     <header class="site-header">
-      <div class="container">
+      <div class="container site-header__inner">
         <a href="../index.html" class="brand" aria-label="MoneyMap Pulse home">
-          <img src="../assets/logo/moneymap-pulse-logo-transparent-trimmed.png" alt="MoneyMap Pulse" class="brand-logo" width="120" height="48">
+          <img src="../assets/logo/moneymap-pulse-logo-transparent-trimmed.png" alt="MoneyMap Pulse" class="brand-logo" width="180" height="72">
         </a>
-        <nav class="nav" aria-label="Main navigation">
-          <a href="../index.html">Home</a>
-          <a href="../guides.html">Guides</a>
-          <a href="../features.html">Features</a>
-          <a href="../faq.html">FAQ</a>
-          <a href="../privacy.html">Privacy</a>
-          <a href="../contact.html">Contact</a>
-        </nav>
-        <div class="header-cta">
-          <a href="https://play.google.com/store/apps/details?id=com.jimilpatel.jpfinancelab" class="button button-primary" rel="noopener noreferrer">Google Play</a>
+        <button type="button" class="nav-toggle" aria-expanded="false" aria-controls="site-navigation" aria-label="Open navigation menu">
+          <span class="nav-toggle__icon nav-toggle__icon--open" aria-hidden="true">☰</span>
+          <span class="nav-toggle__icon nav-toggle__icon--close" aria-hidden="true">✕</span>
+        </button>
+        <div class="site-header__menu" id="site-navigation">
+          <nav class="nav" aria-label="Main navigation">
+            <a href="../index.html">Home</a>
+            <a href="../guides.html" aria-current="page">Guides</a>
+            <a href="../features.html">Features</a>
+            <a href="../faq.html">FAQ</a>
+            <a href="../privacy.html">Privacy</a>
+            <a href="../contact.html">Contact</a>
+          </nav>
+          <div class="header-cta">
+            <a href="https://play.google.com/store/apps/details?id=com.jimilpatel.jpfinancelab" class="button button-primary" rel="noopener noreferrer">Google Play</a>
+          </div>
         </div>
       </div>
     </header>
