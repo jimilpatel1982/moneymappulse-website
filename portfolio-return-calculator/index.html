@@ -49,24 +49,53 @@
           <p>Explores expected returns and risk levels so retirement and investment assumptions feel realistic.</p>
         </section>
         <section class="annotated-shot interactive-tour" aria-labelledby="visual-guide-title" tabindex="0">
-        <div class="container">
+        <div class="container interactive-tour__container">
           <h2 class="annotated-shot__title" id="visual-guide-title">Understanding portfolio assumptions</h2>
-          <p class="interactive-tour__hint">Select a numbered marker on the screenshot to explore each part.</p>
+          <p class="interactive-tour__hint interactive-tour__hint--mobile">Tap a number to explore each part of the screen.</p>
+          <p class="interactive-tour__hint interactive-tour__hint--desktop">Click a marker on the screenshot to learn what each part does.</p>
           <div class="interactive-tour__layout">
-            <div class="annotated-shot__stage">
-              <img class="annotated-shot__img" src="../assets/screenshots/MoneyMapPulse_Screenshot_PortfolioReturn_1080x1920.png" alt="Portfolio Return Calculator in MoneyMap Pulse" width="1080" height="1920" loading="lazy">
-              <button type="button" class="annotated-shot__marker is-active" style="left:50%;top:36%;" data-tour-marker="0" aria-label="Risk profile" aria-pressed="true"><span class="annotated-shot__marker-inner">1</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:46%;" data-tour-marker="1" aria-label="Expected return" aria-pressed="false"><span class="annotated-shot__marker-inner">2</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:56%;" data-tour-marker="2" aria-label="Inflation" aria-pressed="false"><span class="annotated-shot__marker-inner">3</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:66%;" data-tour-marker="3" aria-label="Real return" aria-pressed="false"><span class="annotated-shot__marker-inner">4</span></button>
-            </div>
-            <div class="interactive-tour__panel" role="region" aria-live="polite" aria-label="Annotation details">
-              <div class="interactive-tour__panel-inner" data-tour-panel>
-                <p class="interactive-tour__step-label" aria-hidden="true">①</p>
-              <h3 class="interactive-tour__panel-title">Risk profile</h3>
-              <p class="interactive-tour__panel-desc">Conservative, Balanced or Aggressive.</p>
-              <p class="interactive-tour__example"><strong>Example:</strong> Balanced</p>
+            <div class="interactive-tour__visual">
+              <div class="annotated-shot__stage">
+                <img class="annotated-shot__img" src="../assets/screenshots/MoneyMapPulse_Screenshot_PortfolioReturn_1080x1920.png" alt="Portfolio Return Calculator in MoneyMap Pulse" width="1080" height="1920" loading="lazy">
+                <div class="annotated-shot__highlights" aria-hidden="true"><div class="annotated-shot__highlight is-active" data-tour-highlight="0" style="left:37.0%;top:32.5%;width:26%;height:7%;"></div><div class="annotated-shot__highlight" data-tour-highlight="1" style="left:37.0%;top:42.5%;width:26%;height:7%;"></div><div class="annotated-shot__highlight" data-tour-highlight="2" style="left:37.0%;top:52.5%;width:26%;height:7%;"></div><div class="annotated-shot__highlight" data-tour-highlight="3" style="left:37.0%;top:62.5%;width:26%;height:7%;"></div></div>
+                <button type="button" class="annotated-shot__marker annotated-shot__marker--overlay is-active" style="left:50%;top:36%;" data-tour-marker="0" aria-label="Risk profile" aria-pressed="true"><span class="annotated-shot__marker-inner">1</span></button><button type="button" class="annotated-shot__marker annotated-shot__marker--overlay" style="left:50%;top:46%;" data-tour-marker="1" aria-label="Expected return" aria-pressed="false"><span class="annotated-shot__marker-inner">2</span></button><button type="button" class="annotated-shot__marker annotated-shot__marker--overlay" style="left:50%;top:56%;" data-tour-marker="2" aria-label="Inflation" aria-pressed="false"><span class="annotated-shot__marker-inner">3</span></button><button type="button" class="annotated-shot__marker annotated-shot__marker--overlay" style="left:50%;top:66%;" data-tour-marker="3" aria-label="Real return" aria-pressed="false"><span class="annotated-shot__marker-inner">4</span></button>
               </div>
             </div>
+            <div class="interactive-tour__panel-column">
+              <div class="interactive-tour__panel" role="region" aria-live="polite" aria-label="Annotation details" data-tour-swipe>
+                <div class="interactive-tour__panel-inner" data-tour-panel>
+                  <div class="interactive-tour__panel-header">
+                <span class="interactive-tour__panel-badge" aria-hidden="true">①</span>
+                <h3 class="interactive-tour__panel-title">Risk profile</h3>
+              </div>
+              <p class="interactive-tour__panel-desc">A planning label for how much short-term volatility you are willing to accept.</p>
+              <div class="interactive-tour__panel-details">
+              <p class="interactive-tour__meta interactive-tour__meta--source">
+                <span class="interactive-tour__meta-label">Source</span>
+                <span class="interactive-tour__meta-value">Portfolio Return Calculator</span>
+              </p>
+              <p class="interactive-tour__meta interactive-tour__meta--example">
+                <span class="interactive-tour__meta-label">Example</span>
+                <span class="interactive-tour__meta-value">Balanced</span>
+              </p>
+              </div>
+              <div class="interactive-tour__tip">
+                <span class="interactive-tour__meta-label">Tip</span>
+                <p class="interactive-tour__tip-text">This profile appears on your Financial Health Snapshot once saved.</p>
+              </div>
+                </div>
+                <div class="interactive-tour__nav" data-tour-nav aria-label="Tour navigation">
+                  <button type="button" class="interactive-tour__nav-btn" data-tour-prev disabled aria-label="Previous step">← Previous</button>
+                  <button type="button" class="interactive-tour__nav-btn" data-tour-next aria-label="Next step">Next →</button>
+                </div>
+                <p class="interactive-tour__swipe-hint" aria-hidden="true">Swipe left or right to change step</p>
+              </div>
+            </div>
+            <div class="interactive-tour__marker-rail" role="toolbar" aria-label="Screenshot tour steps">
+              <button type="button" class="interactive-tour__rail-btn is-active" data-tour-marker="0" aria-label="Risk profile" aria-pressed="true"><span class="interactive-tour__rail-num">1</span></button><button type="button" class="interactive-tour__rail-btn" data-tour-marker="1" aria-label="Expected return" aria-pressed="false"><span class="interactive-tour__rail-num">2</span></button><button type="button" class="interactive-tour__rail-btn" data-tour-marker="2" aria-label="Inflation" aria-pressed="false"><span class="interactive-tour__rail-num">3</span></button><button type="button" class="interactive-tour__rail-btn" data-tour-marker="3" aria-label="Real return" aria-pressed="false"><span class="interactive-tour__rail-num">4</span></button>
+            </div>
           </div>
-          <script type="application/json" class="interactive-tour__data">[{"id": 1, "title": "Risk profile", "description": "Conservative, Balanced or Aggressive.", "example": "Balanced", "x": 50, "y": 36}, {"id": 2, "title": "Expected return", "description": "Projected annual investment return before inflation.", "example": "", "x": 50, "y": 46}, {"id": 3, "title": "Inflation", "description": "Expected long-term inflation.", "example": "", "x": 50, "y": 56}, {"id": 4, "title": "Real return", "description": "Expected return minus inflation. Real return feeds long-term retirement planning.", "example": "", "x": 50, "y": 66}]</script>
+          <script type="application/json" class="interactive-tour__data">[{"id": 1, "title": "Risk profile", "description": "A planning label for how much short-term volatility you are willing to accept.", "source": "Portfolio Return Calculator", "example": "Balanced", "tip": "This profile appears on your Financial Health Snapshot once saved.", "x": 50, "y": 36, "highlight": {"hl_x": 37.0, "hl_y": 32.5, "hl_w": 26, "hl_h": 7}}, {"id": 2, "title": "Expected return", "description": "Illustrative annual growth before inflation \u2014 tied to your chosen profile.", "source": "Portfolio Return Calculator", "example": "6% per year", "tip": "Use conservative figures when testing retirement shortfalls.", "x": 50, "y": 46, "highlight": {"hl_x": 37.0, "hl_y": 42.5, "hl_w": 26, "hl_h": 7}}, {"id": 3, "title": "Inflation", "description": "Assumed rise in living costs \u2014 erodes what future pounds can buy.", "source": "Portfolio Return Calculator", "example": "2.5%", "tip": "Even modest inflation matters over 20\u201330 year horizons.", "x": 50, "y": 56, "highlight": {"hl_x": 37.0, "hl_y": 52.5, "hl_w": 26, "hl_h": 7}}, {"id": 4, "title": "Real return", "description": "Expected return after inflation \u2014 better reflects purchasing power over time.", "source": "Portfolio Return Calculator", "example": "~3.5% real", "tip": "Retirement projections are more meaningful when built on real returns.", "x": 50, "y": 66, "highlight": {"hl_x": 37.0, "hl_y": 62.5, "hl_w": 26, "hl_h": 7}}]</script>
         </div>
       </section>
         

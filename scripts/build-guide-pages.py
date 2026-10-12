@@ -79,14 +79,75 @@ def shell(title: str, meta: str, canonical_slug: str, body: str) -> str:
 """
 
 
+def default_highlight(ann: dict[str, Any], index: int, total: int) -> dict[str, float]:
+    if "highlight" in ann:
+        return ann["highlight"]
+    x = float(ann["x"])
+    y = float(ann["y"])
+    width = 26 if total <= 5 else 22
+    height = 7 if total <= 5 else 6
+    return {
+        "hl_x": max(4.0, x - width / 2),
+        "hl_y": max(4.0, y - height / 2),
+        "hl_w": width,
+        "hl_h": height,
+    }
+
+
+CIRCLED_NUMBERS = "①②③④⑤⑥⑦⑧⑨"
+
+
+def render_panel_html(ann: dict[str, Any], index: int) -> str:
+    badge = CIRCLED_NUMBERS[index] if index < len(CIRCLED_NUMBERS) else str(index + 1)
+    source = (
+        f"""<p class="interactive-tour__meta interactive-tour__meta--source">
+                <span class="interactive-tour__meta-label">Source</span>
+                <span class="interactive-tour__meta-value">{ann["source"]}</span>
+              </p>"""
+        if ann.get("source")
+        else ""
+    )
+    example = (
+        f"""<p class="interactive-tour__meta interactive-tour__meta--example">
+                <span class="interactive-tour__meta-label">Example</span>
+                <span class="interactive-tour__meta-value">{ann["example"]}</span>
+              </p>"""
+        if ann.get("example")
+        else ""
+    )
+    tip = (
+        f"""<div class="interactive-tour__tip">
+                <span class="interactive-tour__meta-label">Tip</span>
+                <p class="interactive-tour__tip-text">{ann["tip"]}</p>
+              </div>"""
+        if ann.get("tip")
+        else ""
+    )
+    return f"""<div class="interactive-tour__panel-header">
+                <span class="interactive-tour__panel-badge" aria-hidden="true">{badge}</span>
+                <h3 class="interactive-tour__panel-title">{ann["title"]}</h3>
+              </div>
+              <p class="interactive-tour__panel-desc">{ann["body"]}</p>
+              <div class="interactive-tour__panel-details">
+              {source}
+              {example}
+              </div>
+              {tip}"""
+
+
 def ensure_annotation_coords(spec: dict[str, Any]) -> list[dict[str, Any]]:
     annotations = [dict(a) for a in spec["annotations"]]
     positions = spec.get("positions", [])
+    total = len(annotations)
     for i, ann in enumerate(annotations):
         if "x" not in ann and i < len(positions):
             ann["x"], ann["y"] = positions[i]
         ann.setdefault("x", 50)
         ann.setdefault("y", 36 + i * 8)
+        ann.setdefault("source", spec.get("annotation_source", ""))
+        ann.setdefault("tip", "")
+        ann.setdefault("example", "")
+        ann.update(default_highlight(ann, i, total))
     return annotations
 
 
@@ -98,51 +159,74 @@ def interactive_annotated_screenshot(
     annotations: list[dict[str, Any]],
 ) -> str:
     json_payload = []
-    markers = []
+    overlay_markers = []
+    rail_markers = []
+    highlights = []
     for i, ann in enumerate(annotations):
+        hl = default_highlight(ann, i, len(annotations))
         json_payload.append(
             {
                 "id": i + 1,
                 "title": ann["title"],
                 "description": ann["body"],
+                "source": ann.get("source", ""),
                 "example": ann.get("example", ""),
+                "tip": ann.get("tip", ""),
                 "x": ann["x"],
                 "y": ann["y"],
+                "highlight": hl,
             }
         )
         active = " is-active" if i == 0 else ""
         pressed = "true" if i == 0 else "false"
-        markers.append(
-            f"""<button type="button" class="annotated-shot__marker{active}" """
+        overlay_markers.append(
+            f"""<button type="button" class="annotated-shot__marker annotated-shot__marker--overlay{active}" """
             f"""style="left:{ann['x']}%;top:{ann['y']}%;" data-tour-marker="{i}" """
             f"""aria-label="{ann['title']}" aria-pressed="{pressed}">"""
             f"""<span class="annotated-shot__marker-inner">{i + 1}</span></button>"""
         )
+        rail_markers.append(
+            f"""<button type="button" class="interactive-tour__rail-btn{active}" """
+            f"""data-tour-marker="{i}" aria-label="{ann['title']}" aria-pressed="{pressed}">"""
+            f"""<span class="interactive-tour__rail-num">{i + 1}</span></button>"""
+        )
+        hl_active = " is-active" if i == 0 else ""
+        highlights.append(
+            f"""<div class="annotated-shot__highlight{hl_active}" data-tour-highlight="{i}" """
+            f"""style="left:{hl['hl_x']}%;top:{hl['hl_y']}%;width:{hl['hl_w']}%;height:{hl['hl_h']}%;"></div>"""
+        )
 
-    first = annotations[0]
-    first_example = (
-        f'<p class="interactive-tour__example"><strong>Example:</strong> {first["example"]}</p>'
-        if first.get("example")
-        else ""
-    )
-    initial_panel = f"""<p class="interactive-tour__step-label" aria-hidden="true">①</p>
-              <h3 class="interactive-tour__panel-title">{first["title"]}</h3>
-              <p class="interactive-tour__panel-desc">{first["body"]}</p>
-              {first_example}"""
+    initial_panel = render_panel_html(annotations[0], 0)
+    last_index = len(annotations) - 1
+    next_disabled = " disabled" if last_index == 0 else ""
 
     return f"""<section class="annotated-shot interactive-tour" aria-labelledby="visual-guide-title" tabindex="0">
-        <div class="container">
+        <div class="container interactive-tour__container">
           <h2 class="annotated-shot__title" id="visual-guide-title">{visual_title}</h2>
-          <p class="interactive-tour__hint">Select a numbered marker on the screenshot to explore each part.</p>
+          <p class="interactive-tour__hint interactive-tour__hint--mobile">Tap a number to explore each part of the screen.</p>
+          <p class="interactive-tour__hint interactive-tour__hint--desktop">Click a marker on the screenshot to learn what each part does.</p>
           <div class="interactive-tour__layout">
-            <div class="annotated-shot__stage">
-              <img class="annotated-shot__img" src="../assets/screenshots/{img_file}" alt="{img_alt}" width="1080" height="1920" loading="lazy">
-              {"".join(markers)}
-            </div>
-            <div class="interactive-tour__panel" role="region" aria-live="polite" aria-label="Annotation details">
-              <div class="interactive-tour__panel-inner" data-tour-panel>
-                {initial_panel}
+            <div class="interactive-tour__visual">
+              <div class="annotated-shot__stage">
+                <img class="annotated-shot__img" src="../assets/screenshots/{img_file}" alt="{img_alt}" width="1080" height="1920" loading="lazy">
+                <div class="annotated-shot__highlights" aria-hidden="true">{"".join(highlights)}</div>
+                {"".join(overlay_markers)}
               </div>
+            </div>
+            <div class="interactive-tour__panel-column">
+              <div class="interactive-tour__panel" role="region" aria-live="polite" aria-label="Annotation details" data-tour-swipe>
+                <div class="interactive-tour__panel-inner" data-tour-panel>
+                  {initial_panel}
+                </div>
+                <div class="interactive-tour__nav" data-tour-nav aria-label="Tour navigation">
+                  <button type="button" class="interactive-tour__nav-btn" data-tour-prev disabled aria-label="Previous step">← Previous</button>
+                  <button type="button" class="interactive-tour__nav-btn" data-tour-next{next_disabled} aria-label="Next step">Next →</button>
+                </div>
+                <p class="interactive-tour__swipe-hint" aria-hidden="true">Swipe left or right to change step</p>
+              </div>
+            </div>
+            <div class="interactive-tour__marker-rail" role="toolbar" aria-label="Screenshot tour steps">
+              {"".join(rail_markers)}
             </div>
           </div>
           <script type="application/json" class="interactive-tour__data">{json.dumps(json_payload)}</script>
@@ -249,26 +333,45 @@ GUIDES: dict[str, dict[str, Any]] = {
         "annotations": [
             {
                 "title": "Monthly savings",
-                "body": "From the House Budget Calculator. Income minus expenses.",
+                "body": "Shows how much money remains after expenses are deducted from monthly income — your household cash surplus each month.",
+                "source": "House Budget Calculator",
                 "example": "£1,479 per month",
+                "tip": "Higher monthly savings can improve retirement readiness and long-term wealth building.",
+                "x": 28,
+                "y": 46,
+                "highlight": {"hl_x": 12, "hl_y": 43, "hl_w": 34, "hl_h": 7},
             },
             {
                 "title": "Net worth",
-                "body": "From the Net Worth Calculator. Assets minus liabilities.",
+                "body": "Your total assets minus liabilities — a snapshot of overall financial position at a point in time.",
+                "source": "Net Worth Calculator",
                 "example": "£300,000",
+                "tip": "Update property and pension values periodically so your dashboard reflects reality.",
+                "x": 72,
+                "y": 46,
+                "highlight": {"hl_x": 54, "hl_y": 43, "hl_w": 34, "hl_h": 7},
             },
             {
                 "title": "Risk profile",
-                "body": "From the Portfolio Return Calculator. Conservative, Balanced or Aggressive.",
+                "body": "Summarises the growth and volatility assumptions you chose for long-term planning.",
+                "source": "Portfolio Return Calculator",
                 "example": "Balanced",
+                "tip": "Pick a profile you could stick with in a downturn — it shapes retirement projections.",
+                "x": 28,
+                "y": 58,
+                "highlight": {"hl_x": 12, "hl_y": 55, "hl_w": 34, "hl_h": 7},
             },
             {
                 "title": "Retirement status",
-                "body": "From the Retirement Calculator. Displays On track or Shortfall.",
+                "body": "Indicates whether projected savings at retirement are likely to meet your spending goal.",
+                "source": "Retirement Calculator",
                 "example": "On track",
+                "tip": "If you see a shortfall, try small increases to monthly saving before changing retirement age.",
+                "x": 72,
+                "y": 58,
+                "highlight": {"hl_x": 54, "hl_y": 55, "hl_w": 34, "hl_h": 7},
             },
         ],
-        "positions": [(48, 42), (48, 52), (48, 62), (48, 72)],
         "after_visual": (
             '<section class="guide-section">'
             "<h2>Where this data comes from</h2>"
@@ -299,14 +402,42 @@ GUIDES: dict[str, dict[str, Any]] = {
         "screenshot": ("MoneyMapPulse_Screenshot_Budget_1080x1920.png", "House Budget Calculator in MoneyMap Pulse"),
         "what": "The House Budget Calculator records household income and spending by category, then shows monthly savings and your savings rate.",
         "visual_title": "Understanding your budget summary",
+        "annotation_source": "House Budget Calculator",
         "annotations": [
-            {"title": "Monthly income", "body": "Total monthly household income.", "example": "£5,000"},
-            {"title": "Monthly expenses", "body": "Total monthly spending.", "example": "£1,980"},
-            {"title": "Monthly balance", "body": "Remaining monthly amount after expenses.", "example": "£3,020"},
-            {"title": "Savings rate", "body": "Percentage of income saved each month.", "example": "60.4%"},
+            {
+                "title": "Monthly income",
+                "body": "Total household income received each month before you allocate it to spending or saving.",
+                "source": "House Budget Calculator",
+                "example": "£5,000",
+                "tip": "Use after-tax income if that is what you actually spend from each month.",
+            },
+            {
+                "title": "Monthly expenses",
+                "body": "Everything you spend in a typical month across categories such as housing, food and bills.",
+                "source": "House Budget Calculator",
+                "example": "£1,980",
+                "tip": "Include annual costs spread monthly (insurance, subscriptions) for a fair picture.",
+            },
+            {
+                "title": "Monthly balance",
+                "body": "Income minus expenses — the amount left over to save, invest or pay down debt.",
+                "source": "House Budget Calculator",
+                "example": "£3,020",
+                "tip": "This figure feeds Monthly savings on your Financial Health Snapshot.",
+            },
+            {
+                "title": "Savings rate",
+                "body": "The share of income you keep each month, expressed as a percentage.",
+                "source": "House Budget Calculator",
+                "example": "60.4%",
+                "tip": "Many households aim for 10–20% as a starting goal; yours depends on goals and costs.",
+            },
             {
                 "title": "Expense breakdown",
-                "body": "Shows where spending occurs. Helps identify improvement opportunities.",
+                "body": "Category totals that show where money goes and where you might trim spending.",
+                "source": "House Budget Calculator",
+                "example": "Housing, food, transport",
+                "tip": "Sort by largest categories first when looking for quick wins.",
             },
         ],
         "positions": [(50, 34), (50, 44), (50, 52), (50, 60), (50, 70)],
@@ -340,15 +471,50 @@ GUIDES: dict[str, dict[str, Any]] = {
         "screenshot": ("MoneyMapPulse_Screenshot_Mortgage_1080x1920.png", "Mortgage Calculator in MoneyMap Pulse"),
         "what": "Estimates repayment and interest-only payments plus loan-to-value (LTV) from property value, deposit, rate and term.",
         "visual_title": "Understanding your mortgage results",
+        "annotation_source": "Mortgage Calculator",
         "annotations": [
-            {"title": "Property value", "body": "Full purchase price or current value of the home.", "example": "£350,000", "x": 50, "y": 32},
-            {"title": "Deposit", "body": "Cash you pay upfront. A larger deposit usually lowers your mortgage amount.", "example": "£70,000", "x": 50, "y": 42},
-            {"title": "Mortgage amount", "body": "Property value minus deposit.", "example": "£280,000", "x": 50, "y": 50},
-            {"title": "Monthly payment", "body": "Estimated repayment mortgage payment.", "x": 50, "y": 60},
+            {
+                "title": "Property value",
+                "body": "The purchase price or current market value used to size your loan.",
+                "source": "Mortgage Calculator",
+                "example": "£350,000",
+                "tip": "Use a realistic valuation — overstating it can underestimate your deposit need.",
+                "x": 50,
+                "y": 32,
+            },
+            {
+                "title": "Deposit",
+                "body": "Cash you contribute upfront; it reduces the amount you need to borrow.",
+                "source": "Mortgage Calculator",
+                "example": "£70,000",
+                "tip": "A larger deposit often improves loan-to-value and illustrative rate scenarios.",
+                "x": 50,
+                "y": 42,
+            },
+            {
+                "title": "Mortgage amount",
+                "body": "Property value minus deposit — the principal you would repay over the term.",
+                "source": "Mortgage Calculator",
+                "example": "£280,000",
+                "tip": "Compare this with your Net Worth liabilities for a full debt picture.",
+                "x": 50,
+                "y": 50,
+            },
+            {
+                "title": "Monthly payment",
+                "body": "Illustrative repayment based on rate, term and amount borrowed.",
+                "source": "Mortgage Calculator",
+                "example": "See app estimate",
+                "tip": "Check the payment fits your House Budget before treating it as affordable.",
+                "x": 50,
+                "y": 60,
+            },
             {
                 "title": "LTV ratio",
-                "body": "Mortgage amount divided by property value. Higher LTV generally means higher borrowing risk.",
+                "body": "Loan as a percentage of property value — a common shorthand for equity and risk.",
+                "source": "Mortgage Calculator",
                 "example": "80% LTV",
+                "tip": "Below 80% LTV is a common planning benchmark; real products vary.",
                 "x": 50,
                 "y": 70,
             },
@@ -385,11 +551,36 @@ GUIDES: dict[str, dict[str, Any]] = {
         "screenshot": ("MoneyMapPulse_Screenshot_Investment_1080x1920.png", "Investment Calculator in MoneyMap Pulse"),
         "what": "Projects how an investment might grow using a starting amount, monthly contributions, expected return and time horizon.",
         "visual_title": "Understanding your investment projection",
+        "annotation_source": "Investment Calculator",
         "annotations": [
-            {"title": "Initial investment", "body": "Amount invested today.", "example": "£10,000"},
-            {"title": "Monthly contributions", "body": "Regular monthly investing.", "example": "£500"},
-            {"title": "Future value", "body": "Estimated portfolio value at the end of the period.", "example": "£583,242"},
-            {"title": "Investment growth", "body": "Growth generated by investment returns (not guaranteed)."},
+            {
+                "title": "Initial investment",
+                "body": "The lump sum you start with today before any future contributions.",
+                "source": "Investment Calculator",
+                "example": "£10,000",
+                "tip": "Include pensions or ISAs only if they match how you model this scenario.",
+            },
+            {
+                "title": "Monthly contributions",
+                "body": "Regular amounts added each month — often the biggest driver of long-term growth.",
+                "source": "Investment Calculator",
+                "example": "£500",
+                "tip": "Align this with your House Budget monthly balance where possible.",
+            },
+            {
+                "title": "Future value",
+                "body": "Projected total at the end of your time horizon using your return assumption.",
+                "source": "Investment Calculator",
+                "example": "£583,242",
+                "tip": "Run a lower return scenario to stress-test optimistic assumptions.",
+            },
+            {
+                "title": "Investment growth",
+                "body": "Return above what you paid in — illustrates compounding, not a guarantee.",
+                "source": "Investment Calculator",
+                "example": "Growth vs contributions",
+                "tip": "Markets fluctuate; use this for planning ranges, not predictions.",
+            },
         ],
         "positions": [(50, 35), (50, 45), (50, 55), (50, 65)],
         "inputs": field_table(
@@ -427,13 +618,35 @@ GUIDES: dict[str, dict[str, Any]] = {
         ),
         "what": "Explores expected returns and risk levels so retirement and investment assumptions feel realistic.",
         "visual_title": "Understanding portfolio assumptions",
+        "annotation_source": "Portfolio Return Calculator",
         "annotations": [
-            {"title": "Risk profile", "body": "Conservative, Balanced or Aggressive.", "example": "Balanced"},
-            {"title": "Expected return", "body": "Projected annual investment return before inflation."},
-            {"title": "Inflation", "body": "Expected long-term inflation."},
+            {
+                "title": "Risk profile",
+                "body": "A planning label for how much short-term volatility you are willing to accept.",
+                "source": "Portfolio Return Calculator",
+                "example": "Balanced",
+                "tip": "This profile appears on your Financial Health Snapshot once saved.",
+            },
+            {
+                "title": "Expected return",
+                "body": "Illustrative annual growth before inflation — tied to your chosen profile.",
+                "source": "Portfolio Return Calculator",
+                "example": "6% per year",
+                "tip": "Use conservative figures when testing retirement shortfalls.",
+            },
+            {
+                "title": "Inflation",
+                "body": "Assumed rise in living costs — erodes what future pounds can buy.",
+                "source": "Portfolio Return Calculator",
+                "example": "2.5%",
+                "tip": "Even modest inflation matters over 20–30 year horizons.",
+            },
             {
                 "title": "Real return",
-                "body": "Expected return minus inflation. Real return feeds long-term retirement planning.",
+                "body": "Expected return after inflation — better reflects purchasing power over time.",
+                "source": "Portfolio Return Calculator",
+                "example": "~3.5% real",
+                "tip": "Retirement projections are more meaningful when built on real returns.",
             },
         ],
         "positions": [(50, 36), (50, 46), (50, 56), (50, 66)],
@@ -467,12 +680,58 @@ GUIDES: dict[str, dict[str, Any]] = {
         "screenshot": ("MoneyMapPulse_Screenshot_Retirement_1080x1920.png", "Retirement projection in MoneyMap Pulse"),
         "what": "Projects your retirement fund, what you will need, journey checkpoints and whether you are on track or facing a shortfall.",
         "visual_title": "Understanding your retirement journey",
+        "annotation_source": "Retirement Calculator",
         "annotations": [
-            {"title": "What you'll have", "body": "Projected retirement fund at retirement age.", "example": "£1,092,666", "x": 50, "y": 28},
-            {"title": "What you'll need", "body": "Required retirement amount based on your spending assumptions.", "example": "£1,085,649", "x": 50, "y": 38},
-            {"title": "Retirement journey", "body": "Timeline from today through retirement and later ages.", "x": 50, "y": 50},
-            {"title": "Today snapshot", "body": "Your current savings, monthly contributions and starting position.", "x": 50, "y": 62},
-            {"title": "Retirement snapshot", "body": "Projected fund, income needs and on-track status at retirement.", "x": 50, "y": 72},
+            {
+                "title": "What you'll have",
+                "body": "Estimated pot at your chosen retirement age from savings, contributions and growth assumptions.",
+                "source": "Retirement Calculator",
+                "example": "£1,092,666",
+                "tip": "Refresh when pension statements arrive or your contribution rate changes.",
+                "x": 50,
+                "y": 28,
+                "highlight": {"hl_x": 14, "hl_y": 24, "hl_w": 72, "hl_h": 8},
+            },
+            {
+                "title": "What you'll need",
+                "body": "Target fund implied by how much monthly income you want in retirement and for how long.",
+                "source": "Retirement Calculator",
+                "example": "£1,085,649",
+                "tip": "Small changes to spending assumptions can shift this number significantly.",
+                "x": 50,
+                "y": 38,
+                "highlight": {"hl_x": 14, "hl_y": 34, "hl_w": 72, "hl_h": 8},
+            },
+            {
+                "title": "Retirement journey",
+                "body": "A timeline from today through retirement and later life — connects habits now with outcomes later.",
+                "source": "Retirement Calculator",
+                "example": "Today → Retirement → Age 100",
+                "tip": "Use milestones to see whether steady saving closes any gap over time.",
+                "x": 50,
+                "y": 50,
+                "highlight": {"hl_x": 20, "hl_y": 47, "hl_w": 60, "hl_h": 12},
+            },
+            {
+                "title": "Today",
+                "body": "Your current age, savings and monthly contributions — the starting point for every projection.",
+                "source": "Retirement Calculator",
+                "example": "Age 43",
+                "tip": "Accurate starting balances make the journey view more trustworthy.",
+                "x": 50,
+                "y": 62,
+                "highlight": {"hl_x": 22, "hl_y": 58, "hl_w": 56, "hl_h": 7},
+            },
+            {
+                "title": "Retirement",
+                "body": "Checkpoint at retirement age: projected fund, income need and on-track or shortfall status.",
+                "source": "Retirement Calculator",
+                "example": "Age 65",
+                "tip": "Feeds Retirement status on your Financial Health Snapshot when saved.",
+                "x": 50,
+                "y": 72,
+                "highlight": {"hl_x": 22, "hl_y": 68, "hl_w": 56, "hl_h": 7},
+            },
         ],
         "inputs": field_table(
             [
@@ -506,13 +765,41 @@ GUIDES: dict[str, dict[str, Any]] = {
         "screenshot": ("MoneyMapPulse_Screenshot_NetWorth_1080x1920.png", "Net Worth Calculator in MoneyMap Pulse"),
         "what": "Adds up what you own and what you owe, then calculates net worth and optional context such as wealth percentile.",
         "visual_title": "Understanding your net worth",
+        "annotation_source": "Net Worth Calculator",
         "annotations": [
-            {"title": "Assets", "body": "Everything you own.", "example": "£550,000", "x": 50, "y": 38},
-            {"title": "Liabilities", "body": "Everything you owe.", "example": "£250,000", "x": 50, "y": 48},
-            {"title": "Net worth", "body": "Assets minus liabilities.", "example": "£300,000", "x": 50, "y": 58},
+            {
+                "title": "Assets",
+                "body": "Everything you own with material value — property, cash, investments and pensions.",
+                "source": "Net Worth Calculator",
+                "example": "£550,000",
+                "tip": "Use realistic valuations; estimates are fine until you have formal figures.",
+                "x": 50,
+                "y": 38,
+            },
+            {
+                "title": "Liabilities",
+                "body": "Debts you owe, including mortgages, loans and credit balances.",
+                "source": "Net Worth Calculator",
+                "example": "£250,000",
+                "tip": "Include all major debts so net worth is not overstated.",
+                "x": 50,
+                "y": 48,
+            },
+            {
+                "title": "Net worth",
+                "body": "Assets minus liabilities — your headline wealth number at a point in time.",
+                "source": "Net Worth Calculator",
+                "example": "£300,000",
+                "tip": "This value powers the Net worth tile on your Financial Health Snapshot.",
+                "x": 50,
+                "y": 58,
+            },
             {
                 "title": "Wealth percentile",
-                "body": "Estimated position relative to UK households (illustrative context only).",
+                "body": "Illustrative context for how your net worth compares to UK households — not a goal to chase.",
+                "source": "Net Worth Calculator",
+                "example": "Context band",
+                "tip": "Focus on your own trend over time rather than the percentile alone.",
                 "x": 50,
                 "y": 68,
             },
@@ -546,13 +833,62 @@ GUIDES: dict[str, dict[str, Any]] = {
         "screenshot": ("MoneyMapPulse_Screenshot_BuyToLet_1080x1920.png", "Buy To Let summary in MoneyMap Pulse"),
         "what": "Estimates rent, costs, mortgage, net income, yield and ROI for a rental property scenario.",
         "visual_title": "Understanding your property investment",
+        "annotation_source": "Buy To Let Calculator",
         "annotations": [
-            {"title": "Property value", "body": "Purchase price of the property.", "x": 50, "y": 30},
-            {"title": "Rent", "body": "Expected monthly rental income.", "x": 50, "y": 40},
-            {"title": "Expenses", "body": "Running costs including maintenance and management.", "x": 50, "y": 48},
-            {"title": "Monthly net income", "body": "Monthly profit after costs.", "example": "£362.50", "x": 50, "y": 58},
-            {"title": "Yield", "body": "Rental return relative to property value.", "example": "6.00% gross", "x": 50, "y": 66},
-            {"title": "ROI", "body": "Return on invested capital.", "example": "4.44%", "x": 50, "y": 74},
+            {
+                "title": "Property value",
+                "body": "Purchase price used to size rent, yield and how much capital the deal ties up.",
+                "source": "Buy To Let Calculator",
+                "example": "£250,000",
+                "tip": "Stress-test with conservative valuations if the market is uncertain.",
+                "x": 50,
+                "y": 30,
+            },
+            {
+                "title": "Rent",
+                "body": "Expected monthly rental income before costs and tax.",
+                "source": "Buy To Let Calculator",
+                "example": "£1,250 per month",
+                "tip": "Use local letting research and allow for void periods.",
+                "x": 50,
+                "y": 40,
+            },
+            {
+                "title": "Expenses",
+                "body": "Running costs such as maintenance, insurance, agents and mortgage interest.",
+                "source": "Buy To Let Calculator",
+                "example": "Monthly cost total",
+                "tip": "Under-estimating maintenance is a common reason projections look too rosy.",
+                "x": 50,
+                "y": 48,
+            },
+            {
+                "title": "Monthly net income",
+                "body": "Cash left each month after expenses — your day-to-day cash-flow result.",
+                "source": "Buy To Let Calculator",
+                "example": "£362.50",
+                "tip": "Compare with other uses of the same deposit in your wider plan.",
+                "x": 50,
+                "y": 58,
+            },
+            {
+                "title": "Yield",
+                "body": "Rental income relative to property price — useful for comparing listings.",
+                "source": "Buy To Let Calculator",
+                "example": "6.00% gross",
+                "tip": "Gross yield ignores costs; pair it with net income for decisions.",
+                "x": 50,
+                "y": 66,
+            },
+            {
+                "title": "ROI",
+                "body": "Return on the cash you put in, accounting for income and equity deployed.",
+                "source": "Buy To Let Calculator",
+                "example": "4.44%",
+                "tip": "ROI answers whether the deal rewards your deposit — not just the property price.",
+                "x": 50,
+                "y": 74,
+            },
         ],
         "inputs": field_table(
             [
