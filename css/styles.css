@@ -640,27 +640,43 @@ button:focus-visible {
   width: 100%;
 }
 
-.annotated-shot__highlights {
+.annotated-shot__spotlights {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  z-index: 1;
 }
 
-.annotated-shot__highlight {
+/* Marker-driven soft glow — no borders or wireframe boxes */
+.annotated-shot__spotlight {
   position: absolute;
-  border: 1px solid rgba(0, 122, 255, 0.35);
-  background: rgba(0, 122, 255, 0.05);
-  border-radius: 12px;
-  box-shadow: 0 0 14px rgba(0, 122, 255, 0.12);
+  width: var(--spot-w, 20%);
+  height: var(--spot-h, 5%);
+  transform: translate(-50%, -50%);
+  border: none;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 85% 75% at 50% 50%,
+    rgba(0, 122, 255, 0.16) 0%,
+    rgba(0, 122, 255, 0.07) 42%,
+    transparent 72%
+  );
+  box-shadow: 0 2px 20px rgba(0, 122, 255, 0.12);
   opacity: 0;
-  transition: opacity 0.2s ease, box-shadow 0.2s ease;
+  transition: opacity 0.32s ease, transform 0.32s ease;
 }
 
-.annotated-shot__highlight.is-active {
+.annotated-shot__spotlight.is-active {
   opacity: 1;
-  border-color: rgba(0, 122, 255, 0.5);
-  background: rgba(0, 122, 255, 0.08);
-  box-shadow: 0 0 0 1px rgba(0, 122, 255, 0.15), 0 0 18px rgba(0, 122, 255, 0.14);
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.annotated-shot__stage:has(.annotated-shot__spotlight.is-active) .annotated-shot__img {
+  transition: filter 0.32s ease;
+}
+
+.annotated-shot__stage:has(.annotated-shot__spotlight.is-active) .annotated-shot__img {
+  filter: saturate(1.02);
 }
 
 .annotated-shot__img {

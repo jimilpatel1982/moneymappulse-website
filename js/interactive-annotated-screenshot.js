@@ -69,7 +69,7 @@
     var panel = root.querySelector('[data-tour-panel]');
     if (!panel) return;
 
-    var highlights = root.querySelectorAll('[data-tour-highlight]');
+    var spotlights = root.querySelectorAll('[data-tour-spotlight]');
     var prevBtn = root.querySelector('[data-tour-prev]');
     var nextBtn = root.querySelector('[data-tour-next]');
     var markerGroups = {};
@@ -100,9 +100,9 @@
         });
       });
 
-      highlights.forEach(function (hl) {
-        var i = parseInt(hl.getAttribute('data-tour-highlight'), 10);
-        hl.classList.toggle('is-active', i === index);
+      spotlights.forEach(function (spot) {
+        var i = parseInt(spot.getAttribute('data-tour-spotlight'), 10);
+        spot.classList.toggle('is-active', i === index);
       });
 
       panel.classList.add('is-updating');

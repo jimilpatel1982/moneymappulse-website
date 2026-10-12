@@ -79,19 +79,9 @@ def shell(title: str, meta: str, canonical_slug: str, body: str) -> str:
 """
 
 
-def default_highlight(ann: dict[str, Any], index: int, total: int) -> dict[str, float]:
-    if "highlight" in ann:
-        return ann["highlight"]
-    x = float(ann["x"])
-    y = float(ann["y"])
-    width = 26 if total <= 5 else 22
-    height = 7 if total <= 5 else 6
-    return {
-        "hl_x": max(4.0, x - width / 2),
-        "hl_y": max(4.0, y - height / 2),
-        "hl_w": width,
-        "hl_h": height,
-    }
+def spotlight_dims(ann: dict[str, Any]) -> tuple[float, float]:
+    """Tight glow around the value/card at the marker — not a wireframe box."""
+    return float(ann.get("spot_w", 20)), float(ann.get("spot_h", 5))
 
 
 CIRCLED_NUMBERS = "①②③④⑤⑥⑦⑧⑨"
@@ -147,7 +137,6 @@ def ensure_annotation_coords(spec: dict[str, Any]) -> list[dict[str, Any]]:
         ann.setdefault("source", spec.get("annotation_source", ""))
         ann.setdefault("tip", "")
         ann.setdefault("example", "")
-        ann.update(default_highlight(ann, i, total))
     return annotations
 
 
@@ -161,9 +150,9 @@ def interactive_annotated_screenshot(
     json_payload = []
     overlay_markers = []
     rail_markers = []
-    highlights = []
+    spotlights = []
     for i, ann in enumerate(annotations):
-        hl = default_highlight(ann, i, len(annotations))
+        spot_w, spot_h = spotlight_dims(ann)
         json_payload.append(
             {
                 "id": i + 1,
@@ -174,7 +163,6 @@ def interactive_annotated_screenshot(
                 "tip": ann.get("tip", ""),
                 "x": ann["x"],
                 "y": ann["y"],
-                "highlight": hl,
             }
         )
         active = " is-active" if i == 0 else ""
@@ -190,10 +178,10 @@ def interactive_annotated_screenshot(
             f"""data-tour-marker="{i}" aria-label="{ann['title']}" aria-pressed="{pressed}">"""
             f"""<span class="interactive-tour__rail-num">{i + 1}</span></button>"""
         )
-        hl_active = " is-active" if i == 0 else ""
-        highlights.append(
-            f"""<div class="annotated-shot__highlight{hl_active}" data-tour-highlight="{i}" """
-            f"""style="left:{hl['hl_x']}%;top:{hl['hl_y']}%;width:{hl['hl_w']}%;height:{hl['hl_h']}%;"></div>"""
+        spot_active = " is-active" if i == 0 else ""
+        spotlights.append(
+            f"""<div class="annotated-shot__spotlight{spot_active}" data-tour-spotlight="{i}" """
+            f"""style="left:{ann['x']}%;top:{ann['y']}%;--spot-w:{spot_w}%;--spot-h:{spot_h}%;"></div>"""
         )
 
     initial_panel = render_panel_html(annotations[0], 0)
@@ -209,7 +197,7 @@ def interactive_annotated_screenshot(
             <div class="interactive-tour__visual">
               <div class="annotated-shot__stage">
                 <img class="annotated-shot__img" src="../assets/screenshots/{img_file}" alt="{img_alt}" width="1080" height="1920" loading="lazy">
-                <div class="annotated-shot__highlights" aria-hidden="true">{"".join(highlights)}</div>
+                <div class="annotated-shot__spotlights" aria-hidden="true">{"".join(spotlights)}</div>
                 {"".join(overlay_markers)}
               </div>
             </div>
@@ -337,9 +325,10 @@ GUIDES: dict[str, dict[str, Any]] = {
                 "source": "House Budget Calculator",
                 "example": "£1,479 per month",
                 "tip": "Higher monthly savings can improve retirement readiness and long-term wealth building.",
-                "x": 28,
-                "y": 46,
-                "highlight": {"hl_x": 12, "hl_y": 43, "hl_w": 34, "hl_h": 7},
+                "x": 27,
+                "y": 45.5,
+                "spot_w": 30,
+                "spot_h": 4.5,
             },
             {
                 "title": "Net worth",
@@ -347,9 +336,10 @@ GUIDES: dict[str, dict[str, Any]] = {
                 "source": "Net Worth Calculator",
                 "example": "£300,000",
                 "tip": "Update property and pension values periodically so your dashboard reflects reality.",
-                "x": 72,
-                "y": 46,
-                "highlight": {"hl_x": 54, "hl_y": 43, "hl_w": 34, "hl_h": 7},
+                "x": 73,
+                "y": 45.5,
+                "spot_w": 30,
+                "spot_h": 4.5,
             },
             {
                 "title": "Risk profile",
@@ -357,9 +347,10 @@ GUIDES: dict[str, dict[str, Any]] = {
                 "source": "Portfolio Return Calculator",
                 "example": "Balanced",
                 "tip": "Pick a profile you could stick with in a downturn — it shapes retirement projections.",
-                "x": 28,
-                "y": 58,
-                "highlight": {"hl_x": 12, "hl_y": 55, "hl_w": 34, "hl_h": 7},
+                "x": 27,
+                "y": 57,
+                "spot_w": 30,
+                "spot_h": 4.5,
             },
             {
                 "title": "Retirement status",
@@ -367,9 +358,10 @@ GUIDES: dict[str, dict[str, Any]] = {
                 "source": "Retirement Calculator",
                 "example": "On track",
                 "tip": "If you see a shortfall, try small increases to monthly saving before changing retirement age.",
-                "x": 72,
-                "y": 58,
-                "highlight": {"hl_x": 54, "hl_y": 55, "hl_w": 34, "hl_h": 7},
+                "x": 73,
+                "y": 57,
+                "spot_w": 22,
+                "spot_h": 3.5,
             },
         ],
         "after_visual": (
@@ -410,6 +402,10 @@ GUIDES: dict[str, dict[str, Any]] = {
                 "source": "House Budget Calculator",
                 "example": "£5,000",
                 "tip": "Use after-tax income if that is what you actually spend from each month.",
+                "x": 50,
+                "y": 33.5,
+                "spot_w": 36,
+                "spot_h": 4,
             },
             {
                 "title": "Monthly expenses",
@@ -507,7 +503,9 @@ GUIDES: dict[str, dict[str, Any]] = {
                 "example": "See app estimate",
                 "tip": "Check the payment fits your House Budget before treating it as affordable.",
                 "x": 50,
-                "y": 60,
+                "y": 59,
+                "spot_w": 40,
+                "spot_h": 4.5,
             },
             {
                 "title": "LTV ratio",
@@ -689,8 +687,9 @@ GUIDES: dict[str, dict[str, Any]] = {
                 "example": "£1,092,666",
                 "tip": "Refresh when pension statements arrive or your contribution rate changes.",
                 "x": 50,
-                "y": 28,
-                "highlight": {"hl_x": 14, "hl_y": 24, "hl_w": 72, "hl_h": 8},
+                "y": 27,
+                "spot_w": 44,
+                "spot_h": 4.5,
             },
             {
                 "title": "What you'll need",
@@ -699,8 +698,9 @@ GUIDES: dict[str, dict[str, Any]] = {
                 "example": "£1,085,649",
                 "tip": "Small changes to spending assumptions can shift this number significantly.",
                 "x": 50,
-                "y": 38,
-                "highlight": {"hl_x": 14, "hl_y": 34, "hl_w": 72, "hl_h": 8},
+                "y": 37,
+                "spot_w": 44,
+                "spot_h": 4.5,
             },
             {
                 "title": "Retirement journey",
@@ -710,7 +710,8 @@ GUIDES: dict[str, dict[str, Any]] = {
                 "tip": "Use milestones to see whether steady saving closes any gap over time.",
                 "x": 50,
                 "y": 50,
-                "highlight": {"hl_x": 20, "hl_y": 47, "hl_w": 60, "hl_h": 12},
+                "spot_w": 48,
+                "spot_h": 7,
             },
             {
                 "title": "Today",
@@ -719,8 +720,9 @@ GUIDES: dict[str, dict[str, Any]] = {
                 "example": "Age 43",
                 "tip": "Accurate starting balances make the journey view more trustworthy.",
                 "x": 50,
-                "y": 62,
-                "highlight": {"hl_x": 22, "hl_y": 58, "hl_w": 56, "hl_h": 7},
+                "y": 61,
+                "spot_w": 36,
+                "spot_h": 4,
             },
             {
                 "title": "Retirement",
@@ -729,8 +731,9 @@ GUIDES: dict[str, dict[str, Any]] = {
                 "example": "Age 65",
                 "tip": "Feeds Retirement status on your Financial Health Snapshot when saved.",
                 "x": 50,
-                "y": 72,
-                "highlight": {"hl_x": 22, "hl_y": 68, "hl_w": 56, "hl_h": 7},
+                "y": 71,
+                "spot_w": 36,
+                "spot_h": 4,
             },
         ],
         "inputs": field_table(
@@ -792,7 +795,9 @@ GUIDES: dict[str, dict[str, Any]] = {
                 "example": "£300,000",
                 "tip": "This value powers the Net worth tile on your Financial Health Snapshot.",
                 "x": 50,
-                "y": 58,
+                "y": 57.5,
+                "spot_w": 38,
+                "spot_h": 4.5,
             },
             {
                 "title": "Wealth percentile",
@@ -869,7 +874,9 @@ GUIDES: dict[str, dict[str, Any]] = {
                 "example": "£362.50",
                 "tip": "Compare with other uses of the same deposit in your wider plan.",
                 "x": 50,
-                "y": 58,
+                "y": 57.5,
+                "spot_w": 40,
+                "spot_h": 4.5,
             },
             {
                 "title": "Yield",
