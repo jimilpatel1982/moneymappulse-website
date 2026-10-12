@@ -48,44 +48,25 @@
           <h2>What this tool does</h2>
           <p>Estimates repayment and interest-only payments plus loan-to-value (LTV) from property value, deposit, rate and term.</p>
         </section>
-        <section class="annotated-shot" aria-labelledby="visual-guide-title">
+        <section class="annotated-shot interactive-tour" aria-labelledby="visual-guide-title" tabindex="0">
         <div class="container">
           <h2 class="annotated-shot__title" id="visual-guide-title">Understanding your mortgage results</h2>
-          <div class="annotated-shot__stage">
-            <img class="annotated-shot__img" src="../assets/screenshots/MoneyMapPulse_Screenshot_Mortgage_1080x1920.png" alt="Mortgage Calculator in MoneyMap Pulse" width="1080" height="1920" loading="lazy">
-            <span class="annotated-shot__marker" style="left:50%;top:36%;" aria-hidden="true"><span class="annotated-shot__marker-inner">1</span></span><span class="annotated-shot__marker" style="left:50%;top:46%;" aria-hidden="true"><span class="annotated-shot__marker-inner">2</span></span><span class="annotated-shot__marker" style="left:50%;top:56%;" aria-hidden="true"><span class="annotated-shot__marker-inner">3</span></span><span class="annotated-shot__marker" style="left:50%;top:66%;" aria-hidden="true"><span class="annotated-shot__marker-inner">4</span></span>
+          <p class="interactive-tour__hint">Select a numbered marker on the screenshot to explore each part.</p>
+          <div class="interactive-tour__layout">
+            <div class="annotated-shot__stage">
+              <img class="annotated-shot__img" src="../assets/screenshots/MoneyMapPulse_Screenshot_Mortgage_1080x1920.png" alt="Mortgage Calculator in MoneyMap Pulse" width="1080" height="1920" loading="lazy">
+              <button type="button" class="annotated-shot__marker is-active" style="left:50%;top:32%;" data-tour-marker="0" aria-label="Property value" aria-pressed="true"><span class="annotated-shot__marker-inner">1</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:42%;" data-tour-marker="1" aria-label="Deposit" aria-pressed="false"><span class="annotated-shot__marker-inner">2</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:50%;" data-tour-marker="2" aria-label="Mortgage amount" aria-pressed="false"><span class="annotated-shot__marker-inner">3</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:60%;" data-tour-marker="3" aria-label="Monthly payment" aria-pressed="false"><span class="annotated-shot__marker-inner">4</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:70%;" data-tour-marker="4" aria-label="LTV ratio" aria-pressed="false"><span class="annotated-shot__marker-inner">5</span></button>
+            </div>
+            <div class="interactive-tour__panel" role="region" aria-live="polite" aria-label="Annotation details">
+              <div class="interactive-tour__panel-inner" data-tour-panel>
+                <p class="interactive-tour__step-label" aria-hidden="true">①</p>
+              <h3 class="interactive-tour__panel-title">Property value</h3>
+              <p class="interactive-tour__panel-desc">Full purchase price or current value of the home.</p>
+              <p class="interactive-tour__example"><strong>Example:</strong> £350,000</p>
+              </div>
+            </div>
           </div>
-          <div class="annotated-callouts">
-            <article class="annotated-callout" id="annotation-1">
-              <span class="annotated-callout__num" aria-hidden="true">1</span>
-              <div>
-                <h3>Mortgage amount</h3>
-                <p>Property value minus deposit.</p>
-                
-              </div>
-            </article><article class="annotated-callout" id="annotation-2">
-              <span class="annotated-callout__num" aria-hidden="true">2</span>
-              <div>
-                <h3>Monthly payment</h3>
-                <p>Estimated repayment mortgage payment.</p>
-                
-              </div>
-            </article><article class="annotated-callout" id="annotation-3">
-              <span class="annotated-callout__num" aria-hidden="true">3</span>
-              <div>
-                <h3>Interest only</h3>
-                <p>Monthly interest cost only (not suitable for all products).</p>
-                
-              </div>
-            </article><article class="annotated-callout" id="annotation-4">
-              <span class="annotated-callout__num" aria-hidden="true">4</span>
-              <div>
-                <h3>Loan to value</h3>
-                <p>Mortgage amount divided by property value. Higher LTV generally means higher borrowing risk.</p>
-                <p class="annotated-callout__example"><strong>Example:</strong> 80% LTV</p>
-              </div>
-            </article>
-          </div>
+          <script type="application/json" class="interactive-tour__data">[{"id": 1, "title": "Property value", "description": "Full purchase price or current value of the home.", "example": "\u00a3350,000", "x": 50, "y": 32}, {"id": 2, "title": "Deposit", "description": "Cash you pay upfront. A larger deposit usually lowers your mortgage amount.", "example": "\u00a370,000", "x": 50, "y": 42}, {"id": 3, "title": "Mortgage amount", "description": "Property value minus deposit.", "example": "\u00a3280,000", "x": 50, "y": 50}, {"id": 4, "title": "Monthly payment", "description": "Estimated repayment mortgage payment.", "example": "", "x": 50, "y": 60}, {"id": 5, "title": "LTV ratio", "description": "Mortgage amount divided by property value. Higher LTV generally means higher borrowing risk.", "example": "80% LTV", "x": 50, "y": 70}]</script>
         </div>
       </section>
         
@@ -143,5 +124,6 @@
     </footer>
   </div>
   <script src="../js/main.js"></script>
+  <script src="../js/interactive-annotated-screenshot.js"></script>
 </body>
 </html>

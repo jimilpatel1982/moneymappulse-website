@@ -48,58 +48,25 @@
           <h2>What this tool does</h2>
           <p>Estimates rent, costs, mortgage, net income, yield and ROI for a rental property scenario.</p>
         </section>
-        <section class="annotated-shot" aria-labelledby="visual-guide-title">
+        <section class="annotated-shot interactive-tour" aria-labelledby="visual-guide-title" tabindex="0">
         <div class="container">
           <h2 class="annotated-shot__title" id="visual-guide-title">Understanding your property investment</h2>
-          <div class="annotated-shot__stage">
-            <img class="annotated-shot__img" src="../assets/screenshots/MoneyMapPulse_Screenshot_BuyToLet_1080x1920.png" alt="Buy To Let summary in MoneyMap Pulse" width="1080" height="1920" loading="lazy">
-            <span class="annotated-shot__marker" style="left:50%;top:32%;" aria-hidden="true"><span class="annotated-shot__marker-inner">1</span></span><span class="annotated-shot__marker" style="left:50%;top:42%;" aria-hidden="true"><span class="annotated-shot__marker-inner">2</span></span><span class="annotated-shot__marker" style="left:50%;top:50%;" aria-hidden="true"><span class="annotated-shot__marker-inner">3</span></span><span class="annotated-shot__marker" style="left:50%;top:58%;" aria-hidden="true"><span class="annotated-shot__marker-inner">4</span></span><span class="annotated-shot__marker" style="left:50%;top:66%;" aria-hidden="true"><span class="annotated-shot__marker-inner">5</span></span><span class="annotated-shot__marker" style="left:50%;top:74%;" aria-hidden="true"><span class="annotated-shot__marker-inner">6</span></span>
+          <p class="interactive-tour__hint">Select a numbered marker on the screenshot to explore each part.</p>
+          <div class="interactive-tour__layout">
+            <div class="annotated-shot__stage">
+              <img class="annotated-shot__img" src="../assets/screenshots/MoneyMapPulse_Screenshot_BuyToLet_1080x1920.png" alt="Buy To Let summary in MoneyMap Pulse" width="1080" height="1920" loading="lazy">
+              <button type="button" class="annotated-shot__marker is-active" style="left:50%;top:30%;" data-tour-marker="0" aria-label="Property value" aria-pressed="true"><span class="annotated-shot__marker-inner">1</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:40%;" data-tour-marker="1" aria-label="Rent" aria-pressed="false"><span class="annotated-shot__marker-inner">2</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:48%;" data-tour-marker="2" aria-label="Expenses" aria-pressed="false"><span class="annotated-shot__marker-inner">3</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:58%;" data-tour-marker="3" aria-label="Monthly net income" aria-pressed="false"><span class="annotated-shot__marker-inner">4</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:66%;" data-tour-marker="4" aria-label="Yield" aria-pressed="false"><span class="annotated-shot__marker-inner">5</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:74%;" data-tour-marker="5" aria-label="ROI" aria-pressed="false"><span class="annotated-shot__marker-inner">6</span></button>
+            </div>
+            <div class="interactive-tour__panel" role="region" aria-live="polite" aria-label="Annotation details">
+              <div class="interactive-tour__panel-inner" data-tour-panel>
+                <p class="interactive-tour__step-label" aria-hidden="true">①</p>
+              <h3 class="interactive-tour__panel-title">Property value</h3>
+              <p class="interactive-tour__panel-desc">Purchase price of the property.</p>
+              
+              </div>
+            </div>
           </div>
-          <div class="annotated-callouts">
-            <article class="annotated-callout" id="annotation-1">
-              <span class="annotated-callout__num" aria-hidden="true">1</span>
-              <div>
-                <h3>Property value</h3>
-                <p>Purchase price of the property.</p>
-                
-              </div>
-            </article><article class="annotated-callout" id="annotation-2">
-              <span class="annotated-callout__num" aria-hidden="true">2</span>
-              <div>
-                <h3>Monthly rent</h3>
-                <p>Expected rental income each month.</p>
-                
-              </div>
-            </article><article class="annotated-callout" id="annotation-3">
-              <span class="annotated-callout__num" aria-hidden="true">3</span>
-              <div>
-                <h3>Monthly expenses</h3>
-                <p>Running costs including maintenance and management.</p>
-                
-              </div>
-            </article><article class="annotated-callout" id="annotation-4">
-              <span class="annotated-callout__num" aria-hidden="true">4</span>
-              <div>
-                <h3>Monthly net income</h3>
-                <p>Monthly profit after costs.</p>
-                <p class="annotated-callout__example"><strong>Example:</strong> £362.50</p>
-              </div>
-            </article><article class="annotated-callout" id="annotation-5">
-              <span class="annotated-callout__num" aria-hidden="true">5</span>
-              <div>
-                <h3>Yield</h3>
-                <p>Rental return relative to property value.</p>
-                <p class="annotated-callout__example"><strong>Example:</strong> 6.00% gross</p>
-              </div>
-            </article><article class="annotated-callout" id="annotation-6">
-              <span class="annotated-callout__num" aria-hidden="true">6</span>
-              <div>
-                <h3>ROI</h3>
-                <p>Return on invested capital.</p>
-                <p class="annotated-callout__example"><strong>Example:</strong> 4.44%</p>
-              </div>
-            </article>
-          </div>
+          <script type="application/json" class="interactive-tour__data">[{"id": 1, "title": "Property value", "description": "Purchase price of the property.", "example": "", "x": 50, "y": 30}, {"id": 2, "title": "Rent", "description": "Expected monthly rental income.", "example": "", "x": 50, "y": 40}, {"id": 3, "title": "Expenses", "description": "Running costs including maintenance and management.", "example": "", "x": 50, "y": 48}, {"id": 4, "title": "Monthly net income", "description": "Monthly profit after costs.", "example": "\u00a3362.50", "x": 50, "y": 58}, {"id": 5, "title": "Yield", "description": "Rental return relative to property value.", "example": "6.00% gross", "x": 50, "y": 66}, {"id": 6, "title": "ROI", "description": "Return on invested capital.", "example": "4.44%", "x": 50, "y": 74}]</script>
         </div>
       </section>
         
@@ -157,5 +124,6 @@
     </footer>
   </div>
   <script src="../js/main.js"></script>
+  <script src="../js/interactive-annotated-screenshot.js"></script>
 </body>
 </html>

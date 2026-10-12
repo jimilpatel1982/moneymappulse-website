@@ -48,51 +48,25 @@
           <h2>What this tool does</h2>
           <p>The House Budget Calculator records household income and spending by category, then shows monthly savings and your savings rate.</p>
         </section>
-        <section class="annotated-shot" aria-labelledby="visual-guide-title">
+        <section class="annotated-shot interactive-tour" aria-labelledby="visual-guide-title" tabindex="0">
         <div class="container">
           <h2 class="annotated-shot__title" id="visual-guide-title">Understanding your budget summary</h2>
-          <div class="annotated-shot__stage">
-            <img class="annotated-shot__img" src="../assets/screenshots/MoneyMapPulse_Screenshot_Budget_1080x1920.png" alt="House Budget Calculator in MoneyMap Pulse" width="1080" height="1920" loading="lazy">
-            <span class="annotated-shot__marker" style="left:50%;top:34%;" aria-hidden="true"><span class="annotated-shot__marker-inner">1</span></span><span class="annotated-shot__marker" style="left:50%;top:44%;" aria-hidden="true"><span class="annotated-shot__marker-inner">2</span></span><span class="annotated-shot__marker" style="left:50%;top:52%;" aria-hidden="true"><span class="annotated-shot__marker-inner">3</span></span><span class="annotated-shot__marker" style="left:50%;top:60%;" aria-hidden="true"><span class="annotated-shot__marker-inner">4</span></span><span class="annotated-shot__marker" style="left:50%;top:70%;" aria-hidden="true"><span class="annotated-shot__marker-inner">5</span></span>
+          <p class="interactive-tour__hint">Select a numbered marker on the screenshot to explore each part.</p>
+          <div class="interactive-tour__layout">
+            <div class="annotated-shot__stage">
+              <img class="annotated-shot__img" src="../assets/screenshots/MoneyMapPulse_Screenshot_Budget_1080x1920.png" alt="House Budget Calculator in MoneyMap Pulse" width="1080" height="1920" loading="lazy">
+              <button type="button" class="annotated-shot__marker is-active" style="left:50%;top:34%;" data-tour-marker="0" aria-label="Monthly income" aria-pressed="true"><span class="annotated-shot__marker-inner">1</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:44%;" data-tour-marker="1" aria-label="Monthly expenses" aria-pressed="false"><span class="annotated-shot__marker-inner">2</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:52%;" data-tour-marker="2" aria-label="Monthly balance" aria-pressed="false"><span class="annotated-shot__marker-inner">3</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:60%;" data-tour-marker="3" aria-label="Savings rate" aria-pressed="false"><span class="annotated-shot__marker-inner">4</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:70%;" data-tour-marker="4" aria-label="Expense breakdown" aria-pressed="false"><span class="annotated-shot__marker-inner">5</span></button>
+            </div>
+            <div class="interactive-tour__panel" role="region" aria-live="polite" aria-label="Annotation details">
+              <div class="interactive-tour__panel-inner" data-tour-panel>
+                <p class="interactive-tour__step-label" aria-hidden="true">①</p>
+              <h3 class="interactive-tour__panel-title">Monthly income</h3>
+              <p class="interactive-tour__panel-desc">Total monthly household income.</p>
+              <p class="interactive-tour__example"><strong>Example:</strong> £5,000</p>
+              </div>
+            </div>
           </div>
-          <div class="annotated-callouts">
-            <article class="annotated-callout" id="annotation-1">
-              <span class="annotated-callout__num" aria-hidden="true">1</span>
-              <div>
-                <h3>Monthly income</h3>
-                <p>Total monthly household income.</p>
-                <p class="annotated-callout__example"><strong>Example:</strong> £5,000</p>
-              </div>
-            </article><article class="annotated-callout" id="annotation-2">
-              <span class="annotated-callout__num" aria-hidden="true">2</span>
-              <div>
-                <h3>Monthly expenses</h3>
-                <p>Total monthly spending.</p>
-                <p class="annotated-callout__example"><strong>Example:</strong> £1,980</p>
-              </div>
-            </article><article class="annotated-callout" id="annotation-3">
-              <span class="annotated-callout__num" aria-hidden="true">3</span>
-              <div>
-                <h3>Monthly balance</h3>
-                <p>Remaining monthly amount after expenses.</p>
-                <p class="annotated-callout__example"><strong>Example:</strong> £3,020</p>
-              </div>
-            </article><article class="annotated-callout" id="annotation-4">
-              <span class="annotated-callout__num" aria-hidden="true">4</span>
-              <div>
-                <h3>Savings rate</h3>
-                <p>Percentage of income saved each month.</p>
-                <p class="annotated-callout__example"><strong>Example:</strong> 60.4%</p>
-              </div>
-            </article><article class="annotated-callout" id="annotation-5">
-              <span class="annotated-callout__num" aria-hidden="true">5</span>
-              <div>
-                <h3>Expense breakdown</h3>
-                <p>Shows where spending occurs. Helps identify improvement opportunities.</p>
-                
-              </div>
-            </article>
-          </div>
+          <script type="application/json" class="interactive-tour__data">[{"id": 1, "title": "Monthly income", "description": "Total monthly household income.", "example": "\u00a35,000", "x": 50, "y": 34}, {"id": 2, "title": "Monthly expenses", "description": "Total monthly spending.", "example": "\u00a31,980", "x": 50, "y": 44}, {"id": 3, "title": "Monthly balance", "description": "Remaining monthly amount after expenses.", "example": "\u00a33,020", "x": 50, "y": 52}, {"id": 4, "title": "Savings rate", "description": "Percentage of income saved each month.", "example": "60.4%", "x": 50, "y": 60}, {"id": 5, "title": "Expense breakdown", "description": "Shows where spending occurs. Helps identify improvement opportunities.", "example": "", "x": 50, "y": 70}]</script>
         </div>
       </section>
         
@@ -150,5 +124,6 @@
     </footer>
   </div>
   <script src="../js/main.js"></script>
+  <script src="../js/interactive-annotated-screenshot.js"></script>
 </body>
 </html>

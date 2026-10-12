@@ -48,44 +48,25 @@
           <h2>What this tool does</h2>
           <p>Adds up what you own and what you owe, then calculates net worth and optional context such as wealth percentile.</p>
         </section>
-        <section class="annotated-shot" aria-labelledby="visual-guide-title">
+        <section class="annotated-shot interactive-tour" aria-labelledby="visual-guide-title" tabindex="0">
         <div class="container">
           <h2 class="annotated-shot__title" id="visual-guide-title">Understanding your net worth</h2>
-          <div class="annotated-shot__stage">
-            <img class="annotated-shot__img" src="../assets/screenshots/MoneyMapPulse_Screenshot_NetWorth_1080x1920.png" alt="Net Worth Calculator in MoneyMap Pulse" width="1080" height="1920" loading="lazy">
-            <span class="annotated-shot__marker" style="left:50%;top:38%;" aria-hidden="true"><span class="annotated-shot__marker-inner">1</span></span><span class="annotated-shot__marker" style="left:50%;top:48%;" aria-hidden="true"><span class="annotated-shot__marker-inner">2</span></span><span class="annotated-shot__marker" style="left:50%;top:58%;" aria-hidden="true"><span class="annotated-shot__marker-inner">3</span></span><span class="annotated-shot__marker" style="left:50%;top:68%;" aria-hidden="true"><span class="annotated-shot__marker-inner">4</span></span>
+          <p class="interactive-tour__hint">Select a numbered marker on the screenshot to explore each part.</p>
+          <div class="interactive-tour__layout">
+            <div class="annotated-shot__stage">
+              <img class="annotated-shot__img" src="../assets/screenshots/MoneyMapPulse_Screenshot_NetWorth_1080x1920.png" alt="Net Worth Calculator in MoneyMap Pulse" width="1080" height="1920" loading="lazy">
+              <button type="button" class="annotated-shot__marker is-active" style="left:50%;top:38%;" data-tour-marker="0" aria-label="Assets" aria-pressed="true"><span class="annotated-shot__marker-inner">1</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:48%;" data-tour-marker="1" aria-label="Liabilities" aria-pressed="false"><span class="annotated-shot__marker-inner">2</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:58%;" data-tour-marker="2" aria-label="Net worth" aria-pressed="false"><span class="annotated-shot__marker-inner">3</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:68%;" data-tour-marker="3" aria-label="Wealth percentile" aria-pressed="false"><span class="annotated-shot__marker-inner">4</span></button>
+            </div>
+            <div class="interactive-tour__panel" role="region" aria-live="polite" aria-label="Annotation details">
+              <div class="interactive-tour__panel-inner" data-tour-panel>
+                <p class="interactive-tour__step-label" aria-hidden="true">①</p>
+              <h3 class="interactive-tour__panel-title">Assets</h3>
+              <p class="interactive-tour__panel-desc">Everything you own.</p>
+              <p class="interactive-tour__example"><strong>Example:</strong> £550,000</p>
+              </div>
+            </div>
           </div>
-          <div class="annotated-callouts">
-            <article class="annotated-callout" id="annotation-1">
-              <span class="annotated-callout__num" aria-hidden="true">1</span>
-              <div>
-                <h3>Total assets</h3>
-                <p>Everything you own.</p>
-                <p class="annotated-callout__example"><strong>Example:</strong> £550,000</p>
-              </div>
-            </article><article class="annotated-callout" id="annotation-2">
-              <span class="annotated-callout__num" aria-hidden="true">2</span>
-              <div>
-                <h3>Total liabilities</h3>
-                <p>Everything you owe.</p>
-                <p class="annotated-callout__example"><strong>Example:</strong> £250,000</p>
-              </div>
-            </article><article class="annotated-callout" id="annotation-3">
-              <span class="annotated-callout__num" aria-hidden="true">3</span>
-              <div>
-                <h3>Net worth</h3>
-                <p>Assets minus liabilities.</p>
-                <p class="annotated-callout__example"><strong>Example:</strong> £300,000</p>
-              </div>
-            </article><article class="annotated-callout" id="annotation-4">
-              <span class="annotated-callout__num" aria-hidden="true">4</span>
-              <div>
-                <h3>Wealth percentile</h3>
-                <p>Estimated position relative to UK households (illustrative context only).</p>
-                
-              </div>
-            </article>
-          </div>
+          <script type="application/json" class="interactive-tour__data">[{"id": 1, "title": "Assets", "description": "Everything you own.", "example": "\u00a3550,000", "x": 50, "y": 38}, {"id": 2, "title": "Liabilities", "description": "Everything you owe.", "example": "\u00a3250,000", "x": 50, "y": 48}, {"id": 3, "title": "Net worth", "description": "Assets minus liabilities.", "example": "\u00a3300,000", "x": 50, "y": 58}, {"id": 4, "title": "Wealth percentile", "description": "Estimated position relative to UK households (illustrative context only).", "example": "", "x": 50, "y": 68}]</script>
         </div>
       </section>
         
@@ -143,5 +124,6 @@
     </footer>
   </div>
   <script src="../js/main.js"></script>
+  <script src="../js/interactive-annotated-screenshot.js"></script>
 </body>
 </html>

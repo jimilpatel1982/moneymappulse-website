@@ -48,44 +48,25 @@
           <h2>What this tool does</h2>
           <p>Explores expected returns and risk levels so retirement and investment assumptions feel realistic.</p>
         </section>
-        <section class="annotated-shot" aria-labelledby="visual-guide-title">
+        <section class="annotated-shot interactive-tour" aria-labelledby="visual-guide-title" tabindex="0">
         <div class="container">
           <h2 class="annotated-shot__title" id="visual-guide-title">Understanding portfolio assumptions</h2>
-          <div class="annotated-shot__stage">
-            <img class="annotated-shot__img" src="../assets/screenshots/MoneyMapPulse_Screenshot_PortfolioReturn_1080x1920.png" alt="Portfolio Return Calculator in MoneyMap Pulse" width="1080" height="1920" loading="lazy">
-            <span class="annotated-shot__marker" style="left:50%;top:36%;" aria-hidden="true"><span class="annotated-shot__marker-inner">1</span></span><span class="annotated-shot__marker" style="left:50%;top:46%;" aria-hidden="true"><span class="annotated-shot__marker-inner">2</span></span><span class="annotated-shot__marker" style="left:50%;top:56%;" aria-hidden="true"><span class="annotated-shot__marker-inner">3</span></span><span class="annotated-shot__marker" style="left:50%;top:66%;" aria-hidden="true"><span class="annotated-shot__marker-inner">4</span></span>
+          <p class="interactive-tour__hint">Select a numbered marker on the screenshot to explore each part.</p>
+          <div class="interactive-tour__layout">
+            <div class="annotated-shot__stage">
+              <img class="annotated-shot__img" src="../assets/screenshots/MoneyMapPulse_Screenshot_PortfolioReturn_1080x1920.png" alt="Portfolio Return Calculator in MoneyMap Pulse" width="1080" height="1920" loading="lazy">
+              <button type="button" class="annotated-shot__marker is-active" style="left:50%;top:36%;" data-tour-marker="0" aria-label="Risk profile" aria-pressed="true"><span class="annotated-shot__marker-inner">1</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:46%;" data-tour-marker="1" aria-label="Expected return" aria-pressed="false"><span class="annotated-shot__marker-inner">2</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:56%;" data-tour-marker="2" aria-label="Inflation" aria-pressed="false"><span class="annotated-shot__marker-inner">3</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:66%;" data-tour-marker="3" aria-label="Real return" aria-pressed="false"><span class="annotated-shot__marker-inner">4</span></button>
+            </div>
+            <div class="interactive-tour__panel" role="region" aria-live="polite" aria-label="Annotation details">
+              <div class="interactive-tour__panel-inner" data-tour-panel>
+                <p class="interactive-tour__step-label" aria-hidden="true">①</p>
+              <h3 class="interactive-tour__panel-title">Risk profile</h3>
+              <p class="interactive-tour__panel-desc">Conservative, Balanced or Aggressive.</p>
+              <p class="interactive-tour__example"><strong>Example:</strong> Balanced</p>
+              </div>
+            </div>
           </div>
-          <div class="annotated-callouts">
-            <article class="annotated-callout" id="annotation-1">
-              <span class="annotated-callout__num" aria-hidden="true">1</span>
-              <div>
-                <h3>Risk profile</h3>
-                <p>Conservative, Balanced or Aggressive.</p>
-                <p class="annotated-callout__example"><strong>Example:</strong> Balanced</p>
-              </div>
-            </article><article class="annotated-callout" id="annotation-2">
-              <span class="annotated-callout__num" aria-hidden="true">2</span>
-              <div>
-                <h3>Expected return</h3>
-                <p>Projected annual investment return before inflation.</p>
-                
-              </div>
-            </article><article class="annotated-callout" id="annotation-3">
-              <span class="annotated-callout__num" aria-hidden="true">3</span>
-              <div>
-                <h3>Inflation</h3>
-                <p>Expected long-term inflation.</p>
-                
-              </div>
-            </article><article class="annotated-callout" id="annotation-4">
-              <span class="annotated-callout__num" aria-hidden="true">4</span>
-              <div>
-                <h3>Real return</h3>
-                <p>Expected return minus inflation. Real return feeds long-term retirement planning.</p>
-                
-              </div>
-            </article>
-          </div>
+          <script type="application/json" class="interactive-tour__data">[{"id": 1, "title": "Risk profile", "description": "Conservative, Balanced or Aggressive.", "example": "Balanced", "x": 50, "y": 36}, {"id": 2, "title": "Expected return", "description": "Projected annual investment return before inflation.", "example": "", "x": 50, "y": 46}, {"id": 3, "title": "Inflation", "description": "Expected long-term inflation.", "example": "", "x": 50, "y": 56}, {"id": 4, "title": "Real return", "description": "Expected return minus inflation. Real return feeds long-term retirement planning.", "example": "", "x": 50, "y": 66}]</script>
         </div>
       </section>
         
@@ -143,5 +124,6 @@
     </footer>
   </div>
   <script src="../js/main.js"></script>
+  <script src="../js/interactive-annotated-screenshot.js"></script>
 </body>
 </html>

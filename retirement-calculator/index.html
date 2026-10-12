@@ -48,51 +48,25 @@
           <h2>What this tool does</h2>
           <p>Projects your retirement fund, what you will need, journey checkpoints and whether you are on track or facing a shortfall.</p>
         </section>
-        <section class="annotated-shot" aria-labelledby="visual-guide-title">
+        <section class="annotated-shot interactive-tour" aria-labelledby="visual-guide-title" tabindex="0">
         <div class="container">
           <h2 class="annotated-shot__title" id="visual-guide-title">Understanding your retirement journey</h2>
-          <div class="annotated-shot__stage">
-            <img class="annotated-shot__img" src="../assets/screenshots/MoneyMapPulse_Screenshot_Retirement_1080x1920.png" alt="Retirement projection in MoneyMap Pulse" width="1080" height="1920" loading="lazy">
-            <span class="annotated-shot__marker" style="left:50%;top:30%;" aria-hidden="true"><span class="annotated-shot__marker-inner">1</span></span><span class="annotated-shot__marker" style="left:50%;top:40%;" aria-hidden="true"><span class="annotated-shot__marker-inner">2</span></span><span class="annotated-shot__marker" style="left:50%;top:50%;" aria-hidden="true"><span class="annotated-shot__marker-inner">3</span></span><span class="annotated-shot__marker" style="left:50%;top:60%;" aria-hidden="true"><span class="annotated-shot__marker-inner">4</span></span><span class="annotated-shot__marker" style="left:50%;top:70%;" aria-hidden="true"><span class="annotated-shot__marker-inner">5</span></span>
+          <p class="interactive-tour__hint">Select a numbered marker on the screenshot to explore each part.</p>
+          <div class="interactive-tour__layout">
+            <div class="annotated-shot__stage">
+              <img class="annotated-shot__img" src="../assets/screenshots/MoneyMapPulse_Screenshot_Retirement_1080x1920.png" alt="Retirement projection in MoneyMap Pulse" width="1080" height="1920" loading="lazy">
+              <button type="button" class="annotated-shot__marker is-active" style="left:50%;top:28%;" data-tour-marker="0" aria-label="What you'll have" aria-pressed="true"><span class="annotated-shot__marker-inner">1</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:38%;" data-tour-marker="1" aria-label="What you'll need" aria-pressed="false"><span class="annotated-shot__marker-inner">2</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:50%;" data-tour-marker="2" aria-label="Retirement journey" aria-pressed="false"><span class="annotated-shot__marker-inner">3</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:62%;" data-tour-marker="3" aria-label="Today snapshot" aria-pressed="false"><span class="annotated-shot__marker-inner">4</span></button><button type="button" class="annotated-shot__marker" style="left:50%;top:72%;" data-tour-marker="4" aria-label="Retirement snapshot" aria-pressed="false"><span class="annotated-shot__marker-inner">5</span></button>
+            </div>
+            <div class="interactive-tour__panel" role="region" aria-live="polite" aria-label="Annotation details">
+              <div class="interactive-tour__panel-inner" data-tour-panel>
+                <p class="interactive-tour__step-label" aria-hidden="true">①</p>
+              <h3 class="interactive-tour__panel-title">What you'll have</h3>
+              <p class="interactive-tour__panel-desc">Projected retirement fund at retirement age.</p>
+              <p class="interactive-tour__example"><strong>Example:</strong> £1,092,666</p>
+              </div>
+            </div>
           </div>
-          <div class="annotated-callouts">
-            <article class="annotated-callout" id="annotation-1">
-              <span class="annotated-callout__num" aria-hidden="true">1</span>
-              <div>
-                <h3>What you'll have</h3>
-                <p>Projected retirement fund at your target age.</p>
-                <p class="annotated-callout__example"><strong>Example:</strong> £1,092,666</p>
-              </div>
-            </article><article class="annotated-callout" id="annotation-2">
-              <span class="annotated-callout__num" aria-hidden="true">2</span>
-              <div>
-                <h3>What you'll need</h3>
-                <p>Required retirement amount based on your assumptions.</p>
-                <p class="annotated-callout__example"><strong>Example:</strong> £1,085,649</p>
-              </div>
-            </article><article class="annotated-callout" id="annotation-3">
-              <span class="annotated-callout__num" aria-hidden="true">3</span>
-              <div>
-                <h3>Retirement journey</h3>
-                <p>Timeline from today through retirement and later ages.</p>
-                
-              </div>
-            </article><article class="annotated-callout" id="annotation-4">
-              <span class="annotated-callout__num" aria-hidden="true">4</span>
-              <div>
-                <h3>Retirement status</h3>
-                <p>Shows On track or Shortfall.</p>
-                
-              </div>
-            </article><article class="annotated-callout" id="annotation-5">
-              <span class="annotated-callout__num" aria-hidden="true">5</span>
-              <div>
-                <h3>Checkpoints</h3>
-                <p>Progress milestones throughout your retirement planning journey.</p>
-                
-              </div>
-            </article>
-          </div>
+          <script type="application/json" class="interactive-tour__data">[{"id": 1, "title": "What you'll have", "description": "Projected retirement fund at retirement age.", "example": "\u00a31,092,666", "x": 50, "y": 28}, {"id": 2, "title": "What you'll need", "description": "Required retirement amount based on your spending assumptions.", "example": "\u00a31,085,649", "x": 50, "y": 38}, {"id": 3, "title": "Retirement journey", "description": "Timeline from today through retirement and later ages.", "example": "", "x": 50, "y": 50}, {"id": 4, "title": "Today snapshot", "description": "Your current savings, monthly contributions and starting position.", "example": "", "x": 50, "y": 62}, {"id": 5, "title": "Retirement snapshot", "description": "Projected fund, income needs and on-track status at retirement.", "example": "", "x": 50, "y": 72}]</script>
         </div>
       </section>
         
@@ -150,5 +124,6 @@
     </footer>
   </div>
   <script src="../js/main.js"></script>
+  <script src="../js/interactive-annotated-screenshot.js"></script>
 </body>
 </html>

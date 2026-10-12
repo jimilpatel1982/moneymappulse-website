@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -72,54 +73,79 @@ def shell(title: str, meta: str, canonical_slug: str, body: str) -> str:
     </footer>
   </div>
   <script src="../js/main.js"></script>
+  <script src="../js/interactive-annotated-screenshot.js"></script>
 </body>
 </html>
 """
 
 
-def annotated_screenshot(
+def ensure_annotation_coords(spec: dict[str, Any]) -> list[dict[str, Any]]:
+    annotations = [dict(a) for a in spec["annotations"]]
+    positions = spec.get("positions", [])
+    for i, ann in enumerate(annotations):
+        if "x" not in ann and i < len(positions):
+            ann["x"], ann["y"] = positions[i]
+        ann.setdefault("x", 50)
+        ann.setdefault("y", 36 + i * 8)
+    return annotations
+
+
+def interactive_annotated_screenshot(
+    tour_id: str,
     visual_title: str,
     img_file: str,
     img_alt: str,
-    annotations: list[dict[str, str]],
-    positions: list[tuple[float, float]],
-    single_col_callouts: bool = False,
+    annotations: list[dict[str, Any]],
 ) -> str:
+    json_payload = []
     markers = []
-    for i, (left, top) in enumerate(positions, start=1):
+    for i, ann in enumerate(annotations):
+        json_payload.append(
+            {
+                "id": i + 1,
+                "title": ann["title"],
+                "description": ann["body"],
+                "example": ann.get("example", ""),
+                "x": ann["x"],
+                "y": ann["y"],
+            }
+        )
+        active = " is-active" if i == 0 else ""
+        pressed = "true" if i == 0 else "false"
         markers.append(
-            f'<span class="annotated-shot__marker" style="left:{left}%;top:{top}%;" '
-            f'aria-hidden="true"><span class="annotated-shot__marker-inner">{i}</span></span>'
+            f"""<button type="button" class="annotated-shot__marker{active}" """
+            f"""style="left:{ann['x']}%;top:{ann['y']}%;" data-tour-marker="{i}" """
+            f"""aria-label="{ann['title']}" aria-pressed="{pressed}">"""
+            f"""<span class="annotated-shot__marker-inner">{i + 1}</span></button>"""
         )
-    callouts = []
-    for i, ann in enumerate(annotations, start=1):
-        example = ann.get("example")
-        ex_html = (
-            f'<p class="annotated-callout__example"><strong>Example:</strong> {example}</p>'
-            if example
-            else ""
-        )
-        callouts.append(
-            f"""<article class="annotated-callout" id="annotation-{i}">
-              <span class="annotated-callout__num" aria-hidden="true">{i}</span>
-              <div>
-                <h3>{ann["title"]}</h3>
-                <p>{ann["body"]}</p>
-                {ex_html}
-              </div>
-            </article>"""
-        )
-    col_class = " annotated-callouts--single-col" if single_col_callouts else ""
-    return f"""<section class="annotated-shot" aria-labelledby="visual-guide-title">
+
+    first = annotations[0]
+    first_example = (
+        f'<p class="interactive-tour__example"><strong>Example:</strong> {first["example"]}</p>'
+        if first.get("example")
+        else ""
+    )
+    initial_panel = f"""<p class="interactive-tour__step-label" aria-hidden="true">①</p>
+              <h3 class="interactive-tour__panel-title">{first["title"]}</h3>
+              <p class="interactive-tour__panel-desc">{first["body"]}</p>
+              {first_example}"""
+
+    return f"""<section class="annotated-shot interactive-tour" aria-labelledby="visual-guide-title" tabindex="0">
         <div class="container">
           <h2 class="annotated-shot__title" id="visual-guide-title">{visual_title}</h2>
-          <div class="annotated-shot__stage">
-            <img class="annotated-shot__img" src="../assets/screenshots/{img_file}" alt="{img_alt}" width="1080" height="1920" loading="lazy">
-            {"".join(markers)}
+          <p class="interactive-tour__hint">Select a numbered marker on the screenshot to explore each part.</p>
+          <div class="interactive-tour__layout">
+            <div class="annotated-shot__stage">
+              <img class="annotated-shot__img" src="../assets/screenshots/{img_file}" alt="{img_alt}" width="1080" height="1920" loading="lazy">
+              {"".join(markers)}
+            </div>
+            <div class="interactive-tour__panel" role="region" aria-live="polite" aria-label="Annotation details">
+              <div class="interactive-tour__panel-inner" data-tour-panel>
+                {initial_panel}
+              </div>
+            </div>
           </div>
-          <div class="annotated-callouts{col_class}">
-            {"".join(callouts)}
-          </div>
+          <script type="application/json" class="interactive-tour__data">{json.dumps(json_payload)}</script>
         </div>
       </section>"""
 
@@ -172,15 +198,15 @@ def cta() -> str:
         </section>"""
 
 
-def build_body(spec: dict[str, Any]) -> str:
+def build_body(slug: str, spec: dict[str, Any]) -> str:
     shot_file, shot_alt = spec["screenshot"]
-    visual = annotated_screenshot(
+    annotations = ensure_annotation_coords(spec)
+    visual = interactive_annotated_screenshot(
+        slug,
         spec["visual_title"],
         shot_file,
         shot_alt,
-        spec["annotations"],
-        spec["positions"],
-        spec.get("single_col_callouts", False),
+        annotations,
     )
     extra = spec.get("after_visual", "")
     return f"""<div class="container">
@@ -245,7 +271,7 @@ GUIDES: dict[str, dict[str, Any]] = {
         "positions": [(48, 42), (48, 52), (48, 62), (48, 72)],
         "after_visual": (
             '<section class="guide-section">'
-            "<h2>How calculators connect</h2>"
+            "<h2>Where this data comes from</h2>"
             "<p>Complete calculators in this order to populate your dashboard.</p>"
             f"{flow_diagram()}</section>"
         ),
@@ -315,16 +341,18 @@ GUIDES: dict[str, dict[str, Any]] = {
         "what": "Estimates repayment and interest-only payments plus loan-to-value (LTV) from property value, deposit, rate and term.",
         "visual_title": "Understanding your mortgage results",
         "annotations": [
-            {"title": "Mortgage amount", "body": "Property value minus deposit."},
-            {"title": "Monthly payment", "body": "Estimated repayment mortgage payment."},
-            {"title": "Interest only", "body": "Monthly interest cost only (not suitable for all products)."},
+            {"title": "Property value", "body": "Full purchase price or current value of the home.", "example": "£350,000", "x": 50, "y": 32},
+            {"title": "Deposit", "body": "Cash you pay upfront. A larger deposit usually lowers your mortgage amount.", "example": "£70,000", "x": 50, "y": 42},
+            {"title": "Mortgage amount", "body": "Property value minus deposit.", "example": "£280,000", "x": 50, "y": 50},
+            {"title": "Monthly payment", "body": "Estimated repayment mortgage payment.", "x": 50, "y": 60},
             {
-                "title": "Loan to value",
+                "title": "LTV ratio",
                 "body": "Mortgage amount divided by property value. Higher LTV generally means higher borrowing risk.",
                 "example": "80% LTV",
+                "x": 50,
+                "y": 70,
             },
         ],
-        "positions": [(50, 36), (50, 46), (50, 56), (50, 66)],
         "inputs": field_table(
             [
                 ("Property value", "Purchase price or current value."),
@@ -440,13 +468,12 @@ GUIDES: dict[str, dict[str, Any]] = {
         "what": "Projects your retirement fund, what you will need, journey checkpoints and whether you are on track or facing a shortfall.",
         "visual_title": "Understanding your retirement journey",
         "annotations": [
-            {"title": "What you'll have", "body": "Projected retirement fund at your target age.", "example": "£1,092,666"},
-            {"title": "What you'll need", "body": "Required retirement amount based on your assumptions.", "example": "£1,085,649"},
-            {"title": "Retirement journey", "body": "Timeline from today through retirement and later ages."},
-            {"title": "Retirement status", "body": "Shows On track or Shortfall."},
-            {"title": "Checkpoints", "body": "Progress milestones throughout your retirement planning journey."},
+            {"title": "What you'll have", "body": "Projected retirement fund at retirement age.", "example": "£1,092,666", "x": 50, "y": 28},
+            {"title": "What you'll need", "body": "Required retirement amount based on your spending assumptions.", "example": "£1,085,649", "x": 50, "y": 38},
+            {"title": "Retirement journey", "body": "Timeline from today through retirement and later ages.", "x": 50, "y": 50},
+            {"title": "Today snapshot", "body": "Your current savings, monthly contributions and starting position.", "x": 50, "y": 62},
+            {"title": "Retirement snapshot", "body": "Projected fund, income needs and on-track status at retirement.", "x": 50, "y": 72},
         ],
-        "positions": [(50, 30), (50, 40), (50, 50), (50, 60), (50, 70)],
         "inputs": field_table(
             [
                 ("Current savings", "Pensions and investments today."),
@@ -480,15 +507,16 @@ GUIDES: dict[str, dict[str, Any]] = {
         "what": "Adds up what you own and what you owe, then calculates net worth and optional context such as wealth percentile.",
         "visual_title": "Understanding your net worth",
         "annotations": [
-            {"title": "Total assets", "body": "Everything you own.", "example": "£550,000"},
-            {"title": "Total liabilities", "body": "Everything you owe.", "example": "£250,000"},
-            {"title": "Net worth", "body": "Assets minus liabilities.", "example": "£300,000"},
+            {"title": "Assets", "body": "Everything you own.", "example": "£550,000", "x": 50, "y": 38},
+            {"title": "Liabilities", "body": "Everything you owe.", "example": "£250,000", "x": 50, "y": 48},
+            {"title": "Net worth", "body": "Assets minus liabilities.", "example": "£300,000", "x": 50, "y": 58},
             {
                 "title": "Wealth percentile",
                 "body": "Estimated position relative to UK households (illustrative context only).",
+                "x": 50,
+                "y": 68,
             },
         ],
-        "positions": [(50, 38), (50, 48), (50, 58), (50, 68)],
         "inputs": field_table(
             [
                 ("Assets", "Property, savings, investments, pensions, vehicles, etc."),
@@ -519,14 +547,13 @@ GUIDES: dict[str, dict[str, Any]] = {
         "what": "Estimates rent, costs, mortgage, net income, yield and ROI for a rental property scenario.",
         "visual_title": "Understanding your property investment",
         "annotations": [
-            {"title": "Property value", "body": "Purchase price of the property."},
-            {"title": "Monthly rent", "body": "Expected rental income each month."},
-            {"title": "Monthly expenses", "body": "Running costs including maintenance and management."},
-            {"title": "Monthly net income", "body": "Monthly profit after costs.", "example": "£362.50"},
-            {"title": "Yield", "body": "Rental return relative to property value.", "example": "6.00% gross"},
-            {"title": "ROI", "body": "Return on invested capital.", "example": "4.44%"},
+            {"title": "Property value", "body": "Purchase price of the property.", "x": 50, "y": 30},
+            {"title": "Rent", "body": "Expected monthly rental income.", "x": 50, "y": 40},
+            {"title": "Expenses", "body": "Running costs including maintenance and management.", "x": 50, "y": 48},
+            {"title": "Monthly net income", "body": "Monthly profit after costs.", "example": "£362.50", "x": 50, "y": 58},
+            {"title": "Yield", "body": "Rental return relative to property value.", "example": "6.00% gross", "x": 50, "y": 66},
+            {"title": "ROI", "body": "Return on invested capital.", "example": "4.44%", "x": 50, "y": 74},
         ],
-        "positions": [(50, 32), (50, 42), (50, 50), (50, 58), (50, 66), (50, 74)],
         "inputs": field_table(
             [
                 ("Property value", "Price you pay or expect to pay."),
@@ -557,7 +584,7 @@ GUIDES: dict[str, dict[str, Any]] = {
 
 def main() -> None:
     for slug, spec in GUIDES.items():
-        body = build_body(spec)
+        body = build_body(slug, spec)
         html = shell(spec["title"], spec["meta"], slug, body)
         out_dir = ROOT / slug
         out_dir.mkdir(parents=True, exist_ok=True)
