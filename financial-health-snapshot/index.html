@@ -43,67 +43,96 @@
           <p class="lead">Learn how the Financial Health Snapshot dashboard brings together savings, net worth, risk profile and retirement readiness.</p>
         </div>
       </header>
-      <div class="container guide-hero-wrap"><figure class="guide-hero-media">
-            <img src="../assets/screenshots/MoneyMapPulse_Screenshot_FinancialSnapshot_1080x1920.png" alt="Financial Health Snapshot in MoneyMap Pulse" width="1080" height="1920" loading="lazy">
-          </figure></div>
-
       <div class="container">
         <section class="guide-section">
           <h2>What this tool does</h2>
-          <p>The Financial Health Snapshot is your personal dashboard in MoneyMap Pulse. It summarises key numbers from your calculators so you can see how you are doing without opening every tool separately.</p>
+          <p>The Financial Health Snapshot is your personal dashboard. It pulls saved results from other calculators into one view so you can see savings, wealth, risk and retirement readiness at a glance.</p>
+        </section>
+        <section class="annotated-shot" aria-labelledby="visual-guide-title">
+        <div class="container">
+          <h2 class="annotated-shot__title" id="visual-guide-title">Understanding your dashboard</h2>
+          <div class="annotated-shot__stage">
+            <img class="annotated-shot__img" src="../assets/screenshots/MoneyMapPulse_Screenshot_FinancialSnapshot_1080x1920.png" alt="Financial Health Snapshot in MoneyMap Pulse" width="1080" height="1920" loading="lazy">
+            <span class="annotated-shot__marker" style="left:48%;top:42%;" aria-hidden="true"><span class="annotated-shot__marker-inner">1</span></span><span class="annotated-shot__marker" style="left:48%;top:52%;" aria-hidden="true"><span class="annotated-shot__marker-inner">2</span></span><span class="annotated-shot__marker" style="left:48%;top:62%;" aria-hidden="true"><span class="annotated-shot__marker-inner">3</span></span><span class="annotated-shot__marker" style="left:48%;top:72%;" aria-hidden="true"><span class="annotated-shot__marker-inner">4</span></span>
+          </div>
+          <div class="annotated-callouts">
+            <article class="annotated-callout" id="annotation-1">
+              <span class="annotated-callout__num" aria-hidden="true">1</span>
+              <div>
+                <h3>Monthly savings</h3>
+                <p>From the House Budget Calculator. Income minus expenses.</p>
+                <p class="annotated-callout__example"><strong>Example:</strong> £1,479 per month</p>
+              </div>
+            </article><article class="annotated-callout" id="annotation-2">
+              <span class="annotated-callout__num" aria-hidden="true">2</span>
+              <div>
+                <h3>Net worth</h3>
+                <p>From the Net Worth Calculator. Assets minus liabilities.</p>
+                <p class="annotated-callout__example"><strong>Example:</strong> £300,000</p>
+              </div>
+            </article><article class="annotated-callout" id="annotation-3">
+              <span class="annotated-callout__num" aria-hidden="true">3</span>
+              <div>
+                <h3>Risk profile</h3>
+                <p>From the Portfolio Return Calculator. Conservative, Balanced or Aggressive.</p>
+                <p class="annotated-callout__example"><strong>Example:</strong> Balanced</p>
+              </div>
+            </article><article class="annotated-callout" id="annotation-4">
+              <span class="annotated-callout__num" aria-hidden="true">4</span>
+              <div>
+                <h3>Retirement status</h3>
+                <p>From the Retirement Calculator. Displays On track or Shortfall.</p>
+                <p class="annotated-callout__example"><strong>Example:</strong> On track</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+        <section class="guide-section"><h2>How calculators connect</h2><p>Complete calculators in this order to populate your dashboard.</p><div class="guide-flow" aria-label="How calculators feed your dashboard">
+<a href="../house-budget-calculator/" class="guide-flow__step">House Budget</a>
+<span class="guide-flow__arrow" aria-hidden="true">↓</span>
+<a href="../net-worth-calculator/" class="guide-flow__step">Net Worth</a>
+<span class="guide-flow__arrow" aria-hidden="true">↓</span>
+<a href="../portfolio-return-calculator/" class="guide-flow__step">Portfolio Return</a>
+<span class="guide-flow__arrow" aria-hidden="true">↓</span>
+<a href="../retirement-calculator/" class="guide-flow__step">Retirement</a>
+<span class="guide-flow__arrow" aria-hidden="true">↓</span>
+<a href="../financial-health-snapshot/" class="guide-flow__step">Financial Health Snapshot</a>
+</div></section>
+        <section class="guide-section">
+          <h2>Understanding inputs</h2>
+          <p>You do not type into the snapshot directly. Complete and save the House Budget, Net Worth, Portfolio Return and Retirement calculators first.</p>
         </section>
         <section class="guide-section">
-          <h2>Why it is useful</h2>
-          <p>Budgeting, net worth, investments and retirement can feel disconnected. The snapshot connects them in one view so you can spot gaps, confirm progress and decide what to work on next.</p>
+          <h2>Understanding results</h2>
+          <p><strong>On track</strong> means your projected retirement fund meets or exceeds what you need. <strong>Shortfall</strong> means you may need to adjust savings, retirement age or spending assumptions. Tap a card to open its detail view.</p>
         </section>
         <section class="guide-section">
-          <h2>How to complete the calculator</h2>
-          <p>You do not enter data directly on the snapshot screen. Complete the calculators below, save your results, then open your profile or home dashboard to refresh the snapshot.</p>
-          <ol>
-            <li>Run the House Budget Calculator and save your budget.</li>
-            <li>Complete the Net Worth Calculator with assets and liabilities.</li>
-            <li>Use the Portfolio Return Calculator to choose a risk profile.</li>
-            <li>Run the Retirement Calculator and save your projection.</li>
-            <li>Return to the Financial Health Snapshot to review summary cards.</li>
-          </ol>
-        </section>
-        <section class="guide-section">
-          <h2>What each summary card means</h2>
-          <table class="field-table">
-            <tr><th>Monthly savings</th><td>Leftover income after expenses for the month. Pulled from your saved House Budget.</td></tr>
-            <tr><th>Net worth</th><td>Total assets minus total liabilities. Pulled from your saved Net Worth calculation.</td></tr>
-            <tr><th>Risk profile</th><td>Your selected planning profile (for example Balanced). Pulled from the Portfolio Return Calculator.</td></tr>
-            <tr><th>Retirement status</th><td>Whether your projected fund meets your required fund. Pulled from the Retirement Calculator.</td></tr>
-          </table>
-        </section>
-        <section class="guide-section">
-          <h2>Where dashboard data comes from</h2>
-          <ul class="source-list">
-            <li><strong>Monthly savings</strong> — House Budget Calculator</li>
-            <li><strong>Net worth</strong> — Net Worth Calculator</li>
-            <li><strong>Risk profile</strong> — Portfolio Return Calculator</li>
-            <li><strong>Retirement</strong> — Retirement Calculator</li>
-          </ul>
-        </section>
-        <section class="guide-section">
-          <h2>Understanding your results</h2>
-          <p><strong>On track</strong> means your projected retirement fund meets or exceeds the fund you need based on your assumptions. <strong>Shortfall</strong> means the projection falls below what is required — you may want to adjust savings, retirement age or spending assumptions in the Retirement Calculator.</p>
-          <p>Tap any summary card to open the related detail view (budget breakdown, net worth list, risk profile notes or retirement projection).</p>
+          <h2>Worked example</h2>
+          <div class="example-box"><p><strong>Monthly savings:</strong> £1,479 (from budget)</p><p><strong>Net worth:</strong> £300,000</p><p><strong>Risk profile:</strong> Balanced</p><p><strong>Retirement:</strong> On track</p></div>
         </section>
         <section class="guide-section">
           <h2>Frequently asked questions</h2>
           <div class="faq-list">
 <details class="faq-item">
-              <summary>Why is a card empty?</summary>
-              <div class="faq-answer"><p>The snapshot shows saved calculator results. Open the linked calculator, enter your figures and save.</p></div>
+              <summary>Why is a dashboard card empty?</summary>
+              <div class="faq-answer"><p>Save results in the linked calculator first. The snapshot only shows saved data.</p></div>
+            </details>
+<details class="faq-item">
+              <summary>How often should I update my information?</summary>
+              <div class="faq-answer"><p>Review monthly or after any major change to income, spending, assets or retirement plans.</p></div>
+            </details>
+<details class="faq-item">
+              <summary>Can I use estimated values?</summary>
+              <div class="faq-answer"><p>Yes for planning. Replace estimates with actual figures when you have them.</p></div>
             </details>
 <details class="faq-item">
               <summary>Do I need an account?</summary>
-              <div class="faq-answer"><p>No. Data stays on your device. Saving within the app links calculators to your snapshot.</p></div>
+              <div class="faq-answer"><p>No. Data stays on your device.</p></div>
             </details>
 <details class="faq-item">
-              <summary>How often should I update?</summary>
-              <div class="faq-answer"><p>Update whenever your income, expenses, assets or retirement assumptions change.</p></div>
+              <summary>What should count as retirement income?</summary>
+              <div class="faq-answer"><p>Include pensions, investments and other income you expect in retirement — only if you entered them in the Retirement Calculator.</p></div>
             </details>
 </div>
         </section>
@@ -113,7 +142,6 @@
           <a href="https://play.google.com/store/apps/details?id=com.jimilpatel.jpfinancelab" class="button button-primary" rel="noopener noreferrer">Get it on Google Play</a>
         </section>
       </div>
-    
     </main>
     <footer class="site-footer">
       <div class="container">

@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
-"""Generate static guide pages for MoneyMap Pulse calculators."""
+"""Generate static guide pages with AnnotatedScreenshot visual guides."""
+
+from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 PLAY_STORE = "https://play.google.com/store/apps/details?id=com.jimilpatel.jpfinancelab"
@@ -74,10 +77,91 @@ def shell(title: str, meta: str, canonical_slug: str, body: str) -> str:
 """
 
 
-def hero_img(file: str, alt: str) -> str:
-    return f"""<figure class="guide-hero-media">
-            <img src="../assets/screenshots/{file}" alt="{alt}" width="1080" height="1920" loading="lazy">
-          </figure>"""
+def annotated_screenshot(
+    visual_title: str,
+    img_file: str,
+    img_alt: str,
+    annotations: list[dict[str, str]],
+    positions: list[tuple[float, float]],
+    single_col_callouts: bool = False,
+) -> str:
+    markers = []
+    for i, (left, top) in enumerate(positions, start=1):
+        markers.append(
+            f'<span class="annotated-shot__marker" style="left:{left}%;top:{top}%;" '
+            f'aria-hidden="true"><span class="annotated-shot__marker-inner">{i}</span></span>'
+        )
+    callouts = []
+    for i, ann in enumerate(annotations, start=1):
+        example = ann.get("example")
+        ex_html = (
+            f'<p class="annotated-callout__example"><strong>Example:</strong> {example}</p>'
+            if example
+            else ""
+        )
+        callouts.append(
+            f"""<article class="annotated-callout" id="annotation-{i}">
+              <span class="annotated-callout__num" aria-hidden="true">{i}</span>
+              <div>
+                <h3>{ann["title"]}</h3>
+                <p>{ann["body"]}</p>
+                {ex_html}
+              </div>
+            </article>"""
+        )
+    col_class = " annotated-callouts--single-col" if single_col_callouts else ""
+    return f"""<section class="annotated-shot" aria-labelledby="visual-guide-title">
+        <div class="container">
+          <h2 class="annotated-shot__title" id="visual-guide-title">{visual_title}</h2>
+          <div class="annotated-shot__stage">
+            <img class="annotated-shot__img" src="../assets/screenshots/{img_file}" alt="{img_alt}" width="1080" height="1920" loading="lazy">
+            {"".join(markers)}
+          </div>
+          <div class="annotated-callouts{col_class}">
+            {"".join(callouts)}
+          </div>
+        </div>
+      </section>"""
+
+
+def flow_diagram() -> str:
+    steps = [
+        ("../house-budget-calculator/", "House Budget"),
+        ("../net-worth-calculator/", "Net Worth"),
+        ("../portfolio-return-calculator/", "Portfolio Return"),
+        ("../retirement-calculator/", "Retirement"),
+        ("../financial-health-snapshot/", "Financial Health Snapshot"),
+    ]
+    parts = ['<div class="guide-flow" aria-label="How calculators feed your dashboard">']
+    for i, (href, label) in enumerate(steps):
+        parts.append(f'<a href="{href}" class="guide-flow__step">{label}</a>')
+        if i < len(steps) - 1:
+            parts.append('<span class="guide-flow__arrow" aria-hidden="true">↓</span>')
+    parts.append("</div>")
+    return "\n".join(parts)
+
+
+def field_table(rows: list[tuple[str, str]]) -> str:
+    trs = "".join(f"<tr><th>{a}</th><td>{b}</td></tr>" for a, b in rows)
+    return f'<table class="field-table">{trs}</table>'
+
+
+def example_box(lines: list[str]) -> str:
+    ps = "".join(f"<p>{line}</p>" for line in lines)
+    return f'<div class="example-box">{ps}</div>'
+
+
+def faq_block(items: list[tuple[str, str]]) -> str:
+    parts = ['<div class="faq-list">']
+    for q, a in items:
+        parts.append(
+            f"""<details class="faq-item">
+              <summary>{q}</summary>
+              <div class="faq-answer"><p>{a}</p></div>
+            </details>"""
+        )
+    parts.append("</div>")
+    return "\n".join(parts)
 
 
 def cta() -> str:
@@ -88,377 +172,393 @@ def cta() -> str:
         </section>"""
 
 
-def faq_block(items: list[tuple[str, str]]) -> str:
-    parts = ['<div class="faq-list">']
-    for q, a in items:
-        parts.append(f"""<details class="faq-item">
-              <summary>{q}</summary>
-              <div class="faq-answer"><p>{a}</p></div>
-            </details>""")
-    parts.append("</div>")
-    return "\n".join(parts)
-
-
-GUIDES: dict[str, dict] = {}
-
-
-def register(slug: str, **kwargs):
-    GUIDES[slug] = kwargs
-
-
-register(
-    "financial-health-snapshot",
-    title="Financial Health Snapshot",
-    meta="Learn how the Financial Health Snapshot dashboard brings together savings, net worth, risk profile and retirement readiness.",
-    screenshot=("MoneyMapPulse_Screenshot_FinancialSnapshot_1080x1920.png", "Financial Health Snapshot in MoneyMap Pulse"),
-    content="""
-      <div class="container">
+def build_body(spec: dict[str, Any]) -> str:
+    shot_file, shot_alt = spec["screenshot"]
+    visual = annotated_screenshot(
+        spec["visual_title"],
+        shot_file,
+        shot_alt,
+        spec["annotations"],
+        spec["positions"],
+        spec.get("single_col_callouts", False),
+    )
+    extra = spec.get("after_visual", "")
+    return f"""<div class="container">
         <section class="guide-section">
           <h2>What this tool does</h2>
-          <p>The Financial Health Snapshot is your personal dashboard in MoneyMap Pulse. It summarises key numbers from your calculators so you can see how you are doing without opening every tool separately.</p>
+          <p>{spec["what"]}</p>
+        </section>
+        {visual}
+        {extra}
+        <section class="guide-section">
+          <h2>Understanding inputs</h2>
+          {spec["inputs"]}
         </section>
         <section class="guide-section">
-          <h2>Why it is useful</h2>
-          <p>Budgeting, net worth, investments and retirement can feel disconnected. The snapshot connects them in one view so you can spot gaps, confirm progress and decide what to work on next.</p>
+          <h2>Understanding results</h2>
+          {spec["results"]}
         </section>
         <section class="guide-section">
-          <h2>How to complete the calculator</h2>
-          <p>You do not enter data directly on the snapshot screen. Complete the calculators below, save your results, then open your profile or home dashboard to refresh the snapshot.</p>
-          <ol>
-            <li>Run the House Budget Calculator and save your budget.</li>
-            <li>Complete the Net Worth Calculator with assets and liabilities.</li>
-            <li>Use the Portfolio Return Calculator to choose a risk profile.</li>
-            <li>Run the Retirement Calculator and save your projection.</li>
-            <li>Return to the Financial Health Snapshot to review summary cards.</li>
-          </ol>
-        </section>
-        <section class="guide-section">
-          <h2>What each summary card means</h2>
-          <table class="field-table">
-            <tr><th>Monthly savings</th><td>Leftover income after expenses for the month. Pulled from your saved House Budget.</td></tr>
-            <tr><th>Net worth</th><td>Total assets minus total liabilities. Pulled from your saved Net Worth calculation.</td></tr>
-            <tr><th>Risk profile</th><td>Your selected planning profile (for example Balanced). Pulled from the Portfolio Return Calculator.</td></tr>
-            <tr><th>Retirement status</th><td>Whether your projected fund meets your required fund. Pulled from the Retirement Calculator.</td></tr>
-          </table>
-        </section>
-        <section class="guide-section">
-          <h2>Where dashboard data comes from</h2>
-          <ul class="source-list">
-            <li><strong>Monthly savings</strong> — House Budget Calculator</li>
-            <li><strong>Net worth</strong> — Net Worth Calculator</li>
-            <li><strong>Risk profile</strong> — Portfolio Return Calculator</li>
-            <li><strong>Retirement</strong> — Retirement Calculator</li>
-          </ul>
-        </section>
-        <section class="guide-section">
-          <h2>Understanding your results</h2>
-          <p><strong>On track</strong> means your projected retirement fund meets or exceeds the fund you need based on your assumptions. <strong>Shortfall</strong> means the projection falls below what is required — you may want to adjust savings, retirement age or spending assumptions in the Retirement Calculator.</p>
-          <p>Tap any summary card to open the related detail view (budget breakdown, net worth list, risk profile notes or retirement projection).</p>
+          <h2>Worked example</h2>
+          {spec["example"]}
         </section>
         <section class="guide-section">
           <h2>Frequently asked questions</h2>
-          """ + faq_block([
-        ("Why is a card empty?", "The snapshot shows saved calculator results. Open the linked calculator, enter your figures and save."),
-        ("Do I need an account?", "No. Data stays on your device. Saving within the app links calculators to your snapshot."),
-        ("How often should I update?", "Update whenever your income, expenses, assets or retirement assumptions change."),
-    ]) + """
+          {faq_block(spec["faqs"])}
         </section>
-        """ + cta() + """
-      </div>
-    """,
-)
-
-register(
-    "house-budget-calculator",
-    title="House Budget Calculator",
-    meta="Track household income, expenses and monthly savings with the House Budget Calculator.",
-    screenshot=("MoneyMapPulse_Screenshot_Budget_1080x1920.png", "House Budget Calculator in MoneyMap Pulse"),
-    content="""
-      <div class="container">
-        <section class="guide-section"><h2>What this tool does</h2>
-          <p>The House Budget Calculator helps you record income and spending by category, then shows how much you save each month and your savings rate.</p></section>
-        <section class="guide-section"><h2>Why it is useful</h2>
-          <p>Knowing your monthly savings is the foundation for retirement planning, investments and your Financial Health Snapshot. It turns everyday spending into a clear cash-flow picture.</p></section>
-        <section class="guide-section"><h2>How to complete the calculator</h2>
-          <ol><li>Open Financial Calculators and choose House Budget.</li>
-          <li>Enter all income sources for the household.</li>
-          <li>Enter expenses in each category that applies to you.</li>
-          <li>Review totals and save your budget.</li></ol></section>
-        <section class="guide-section"><h2>Input fields explained</h2>
-          <table class="field-table">
-            <tr><th>Income</th><td>Money coming in each month (salary, self-employment, benefits, rent received, etc.).</td></tr>
-            <tr><th>Expenses</th><td>Money going out, grouped into categories such as housing, transport, food and leisure.</td></tr>
-            <tr><th>Savings</th><td>Income minus expenses — what is left at the end of the month.</td></tr>
-            <tr><th>Savings rate</th><td>Savings divided by income, shown as a percentage.</td></tr>
-          </table></section>
-        <section class="guide-section"><h2>Worked example</h2>
-          <div class="example-box">
-            <p><strong>Income:</strong> £4,700</p>
-            <p><strong>Expenses:</strong> £3,221</p>
-            <p><strong>Savings:</strong> £1,479</p>
-            <p><strong>Savings rate:</strong> 31.5%</p>
-          </div></section>
-        <section class="guide-section"><h2>Understanding your results</h2>
-          <p>The summary shows whether your plan is sustainable and feeds <strong>Monthly savings</strong> on your Financial Health Snapshot. Use category totals to see where you might adjust spending.</p></section>
-        <section class="guide-section"><h2>Frequently asked questions</h2>
-          """ + faq_block([
-        ("Should I use net or gross income?", "Use the amount that actually lands in your account if that is how you plan day to day."),
-        ("Can I budget monthly if I am paid weekly?", "Yes. Enter typical monthly totals or average your weekly figures across a month."),
-    ]) + """</section>""" + cta() + """</div>""",
-)
-
-register(
-    "mortgage-calculator",
-    title="Mortgage Calculator",
-    meta="Estimate mortgage payments, interest and loan-to-value with the Mortgage Calculator.",
-    screenshot=("MoneyMapPulse_Screenshot_Mortgage_1080x1920.png", "Mortgage Calculator in MoneyMap Pulse"),
-    content="""
-      <div class="container">
-        <section class="guide-section"><h2>What this tool does</h2>
-          <p>Estimates monthly mortgage payments, interest-only payments and loan-to-value (LTV) based on property value, deposit, rate and term.</p></section>
-        <section class="guide-section"><h2>Why it is useful</h2>
-          <p>Before you buy or remortgage, you can test whether a payment fits your household budget and how deposit size affects borrowing.</p></section>
-        <section class="guide-section"><h2>How to complete the calculator</h2>
-          <ol><li>Open the Mortgage Calculator from the hub.</li>
-          <li>Enter property value and deposit.</li>
-          <li>Enter interest rate and mortgage term in years.</li>
-          <li>Review repayment and interest-only results.</li></ol></section>
-        <section class="guide-section"><h2>Input fields explained</h2>
-          <table class="field-table">
-            <tr><th>Property value</th><td>Price of the home you are buying or current value for remortgage planning.</td></tr>
-            <tr><th>Deposit</th><td>Cash you put down. Mortgage amount is usually value minus deposit.</td></tr>
-            <tr><th>Mortgage amount</th><td>Amount borrowed (often calculated automatically).</td></tr>
-            <tr><th>Interest rate</th><td>Annual rate for illustration — use a rate you expect, not a guaranteed offer.</td></tr>
-            <tr><th>Mortgage term</th><td>Length of the loan in years (for example 25 or 30).</td></tr>
-          </table></section>
-        <section class="guide-section"><h2>Worked example</h2>
-          <div class="example-box">
-            <p><strong>Property value:</strong> £350,000</p>
-            <p><strong>Deposit:</strong> £70,000</p>
-            <p><strong>Mortgage amount:</strong> £280,000</p>
-            <p><strong>Interest rate:</strong> 4.5%</p>
-            <p><strong>Term:</strong> 25 years</p>
-            <p><strong>Monthly payment (repayment):</strong> illustrative figure shown in app</p>
-            <p><strong>LTV:</strong> 80%</p>
-          </div></section>
-        <section class="guide-section"><h2>Understanding your results</h2>
-          <p><strong>Monthly payment</strong> is your estimated repayment mortgage cost. <strong>Interest only</strong> shows payments if you paid interest alone (not suitable for all products). <strong>LTV ratio</strong> helps you see how much equity you have — lower LTV often means better rates in real lending, but this app only estimates.</p></section>
-        <section class="guide-section"><h2>Frequently asked questions</h2>
-          """ + faq_block([
-        ("Is this a mortgage offer?", "No. Figures are estimates for planning, not lending advice."),
-        ("Does it include fees or insurance?", "Only what you enter. Add stamp duty, fees and insurance separately in your budget."),
-    ]) + """</section>""" + cta() + """</div>""",
-)
-
-register(
-    "investment-calculator",
-    title="Investment Calculator",
-    meta="Project future investment value from lump sums and monthly contributions.",
-    screenshot=("MoneyMapPulse_Screenshot_Investment_1080x1920.png", "Investment projection in MoneyMap Pulse"),
-    content="""
-      <div class="container">
-        <section class="guide-section"><h2>What this tool does</h2>
-          <p>Projects how savings might grow over time using an initial amount, regular contributions, expected return and time horizon.</p></section>
-        <section class="guide-section"><h2>Why it is useful</h2>
-          <p>Helps you set realistic expectations for long-term goals and compare different contribution levels — without promising actual market performance.</p></section>
-        <section class="guide-section"><h2>How to complete the calculator</h2>
-          <ol><li>Open Investment Calculator.</li>
-          <li>Enter initial investment and monthly contribution.</li>
-          <li>Set expected annual return and investment period.</li>
-          <li>Choose contribution timing if shown (start or end of month).</li>
-          <li>Review future value and milestone projections.</li></ol></section>
-        <section class="guide-section"><h2>Input fields explained</h2>
-          <table class="field-table">
-            <tr><th>Initial investment</th><td>Lump sum already invested or starting balance.</td></tr>
-            <tr><th>Monthly contributions</th><td>Amount you plan to add each month.</td></tr>
-            <tr><th>Expected return</th><td>Annual growth rate assumption — not a guarantee.</td></tr>
-            <tr><th>Time horizon</th><td>Number of years you plan to stay invested.</td></tr>
-          </table></section>
-        <section class="guide-section"><h2>Worked example</h2>
-          <div class="example-box">
-            <p><strong>Initial investment:</strong> £10,000</p>
-            <p><strong>Monthly contributions:</strong> £500</p>
-            <p><strong>Expected return:</strong> 6% per year</p>
-            <p><strong>Time horizon:</strong> 20 years</p>
-            <p><strong>Future value:</strong> shown in app (illustrative)</p>
-            <p><strong>Total contributions:</strong> £130,000</p>
-            <p><strong>Investment growth:</strong> future value minus contributions</p>
-          </div></section>
-        <section class="guide-section"><h2>Understanding your results</h2>
-          <p><strong>Future value</strong> is the projected balance at the end of the period. <strong>Total contributions</strong> is what you paid in. <strong>Investment growth</strong> is the projected gain. Reference milestones (5, 10, 15 years) help you see progress along the way.</p></section>
-        <section class="guide-section"><h2>Frequently asked questions</h2>
-          """ + faq_block([
-        ("Will I really get this return?", "No projection is guaranteed. Markets vary; use conservative assumptions."),
-        ("Does this include tax?", "Unless you add tax assumptions elsewhere, treat results as before-tax illustrations."),
-    ]) + """</section>""" + cta() + """</div>""",
-)
-
-register(
-    "portfolio-return-calculator",
-    title="Portfolio Return Calculator",
-    meta="Estimate inflation-adjusted returns and choose a risk profile for planning.",
-    screenshot=("MoneyMapPulse_Screenshot_PortfolioReturn_1080x1920.png", "Portfolio Return Calculator in MoneyMap Pulse"),
-    content="""
-      <div class="container">
-        <section class="guide-section"><h2>What this tool does</h2>
-          <p>Helps you explore expected portfolio returns based on asset mix or risk level, often with inflation in mind, so planning assumptions are more realistic.</p></section>
-        <section class="guide-section"><h2>Why it is useful</h2>
-          <p>Retirement and investment calculators need a return assumption. This tool supports choosing a profile that matches how much risk you are comfortable taking on paper.</p></section>
-        <section class="guide-section"><h2>How to complete the calculator</h2>
-          <ol><li>Open Portfolio Return Calculator.</li>
-          <li>Review asset categories or risk profiles available in the app.</li>
-          <li>Enter allocations or select a profile (for example Cautious, Balanced, Growth).</li>
-          <li>Save results to feed your Financial Health Snapshot risk profile.</li></ol></section>
-        <section class="guide-section"><h2>Input fields explained</h2>
-          <table class="field-table">
-            <tr><th>Asset allocation</th><td>How your money is split across types such as cash, bonds and shares.</td></tr>
-            <tr><th>Expected return</th><td>Illustrative long-term return for each asset class or combined portfolio.</td></tr>
-            <tr><th>Inflation</th><td>Optional adjustment so you see real (inflation-adjusted) returns.</td></tr>
-            <tr><th>Risk profile</th><td>Label summarising your mix (feeds the dashboard card).</td></tr>
-          </table></section>
-        <section class="guide-section"><h2>Worked example</h2>
-          <div class="example-box">
-            <p><strong>Profile:</strong> Balanced</p>
-            <p><strong>Illustrative return:</strong> 5–6% before inflation</p>
-            <p><strong>After inflation:</strong> lower real return shown in app</p>
-            <p>Use these figures as planning inputs in retirement or investment tools — not as forecasts.</p>
-          </div></section>
-        <section class="guide-section"><h2>Understanding your results</h2>
-          <p>The summary explains expected volatility in plain terms. Your selected <strong>risk profile</strong> appears on the Financial Health Snapshot so you can align retirement assumptions with how you invest on paper.</p></section>
-        <section class="guide-section"><h2>Frequently asked questions</h2>
-          """ + faq_block([
-        ("Is this personal investment advice?", "No. It is an educational planning aid."),
-        ("Can I change profile later?", "Yes. Update anytime and refresh your snapshot."),
-    ]) + """</section>""" + cta() + """</div>""",
-)
-
-register(
-    "retirement-calculator",
-    title="Retirement Calculator",
-    meta="Review retirement projections, journey checkpoints and whether you are on track.",
-    screenshot=("MoneyMapPulse_Screenshot_Retirement_1080x1920.png", "Retirement projection in MoneyMap Pulse"),
-    content="""
-      <div class="container">
-        <section class="guide-section"><h2>What this tool does</h2>
-          <p>Projects retirement fund growth, required fund at retirement, monthly income needs and journey checkpoints from today through retirement age.</p></section>
-        <section class="guide-section"><h2>Why it is useful</h2>
-          <p>Shows whether current savings habits might support your target lifestyle and highlights shortfalls early enough to adjust contributions or retirement age on paper.</p></section>
-        <section class="guide-section"><h2>How to complete the calculator</h2>
-          <ol><li>Open Retirement Calculator.</li>
-          <li>Enter current age, retirement age and life expectancy if asked.</li>
-          <li>Add current savings, monthly contributions and return assumptions.</li>
-          <li>Enter expected retirement spending.</li>
-          <li>Save and review journey and funding breakdown.</li></ol></section>
-        <section class="guide-section"><h2>Input fields explained</h2>
-          <table class="field-table">
-            <tr><th>Current savings</th><td>Pensions and investments counted toward retirement.</td></tr>
-            <tr><th>Monthly saving</th><td>Regular contributions until retirement.</td></tr>
-            <tr><th>Retirement age</th><td>Age you plan to stop full-time work.</td></tr>
-            <tr><th>Retirement spending</th><td>Monthly income you want in retirement (today's money or as labelled in app).</td></tr>
-            <tr><th>Return assumption</th><td>Growth rate applied to projections.</td></tr>
-          </table></section>
-        <section class="guide-section"><h2>Worked example</h2>
-          <div class="example-box">
-            <p><strong>Projected pension fund:</strong> £1,092,666</p>
-            <p><strong>Required fund:</strong> £1,085,649</p>
-            <p><strong>Status:</strong> On track</p>
-            <p><strong>Ahead by:</strong> £7,017 (illustrative)</p>
-          </div></section>
-        <section class="guide-section"><h2>Understanding your results</h2>
-          <p><strong>On track</strong> means projected assets meet required fund. <strong>Shortfall</strong> means you may need higher savings, later retirement or lower spending assumptions. The <strong>retirement journey</strong> timeline shows checkpoints at today, retirement and later ages with funding breakdowns.</p></section>
-        <section class="guide-section"><h2>Frequently asked questions</h2>
-          """ + faq_block([
-        ("Does this include State Pension?", "Only if you enter it. Add state and workplace pensions explicitly."),
-        ("Are tax rules modelled?", "The app provides estimates; tax treatment may be simplified."),
-    ]) + """</section>""" + cta() + """</div>""",
-)
-
-register(
-    "net-worth-calculator",
-    title="Net Worth Calculator",
-    meta="Calculate assets, liabilities and track your net worth over time.",
-    screenshot=("MoneyMapPulse_Screenshot_NetWorth_1080x1920.png", "Net Worth Calculator in MoneyMap Pulse"),
-    content="""
-      <div class="container">
-        <section class="guide-section"><h2>What this tool does</h2>
-          <p>Lists what you own (assets) and what you owe (liabilities), then calculates net worth.</p></section>
-        <section class="guide-section"><h2>Why it is useful</h2>
-          <p>Net worth is a single number for your overall position — useful for goals, retirement planning and the Financial Health Snapshot.</p></section>
-        <section class="guide-section"><h2>How to complete the calculator</h2>
-          <ol><li>Open Net Worth Calculator.</li>
-          <li>Add assets (property, savings, investments, pensions, etc.).</li>
-          <li>Add liabilities (mortgages, loans, credit cards).</li>
-          <li>Review totals and save.</li></ol></section>
-        <section class="guide-section"><h2>Input fields explained</h2>
-          <table class="field-table">
-            <tr><th>Assets</th><td>Items with positive value you own.</td></tr>
-            <tr><th>Liabilities</th><td>Debts you still owe.</td></tr>
-            <tr><th>Net worth</th><td>Assets minus liabilities.</td></tr>
-            <tr><th>Liquid vs illiquid</th><td>Where shown, separates easy-to-access cash from property and long-term holdings.</td></tr>
-          </table></section>
-        <section class="guide-section"><h2>Worked example</h2>
-          <div class="example-box">
-            <p><strong>Assets:</strong> £550,000</p>
-            <p><strong>Liabilities:</strong> £250,000</p>
-            <p><strong>Net worth:</strong> £300,000</p>
-          </div></section>
-        <section class="guide-section"><h2>Understanding your results</h2>
-          <p>Totals feed the <strong>Net worth</strong> card on your snapshot. Update when you buy property, pay down debt or build savings.</p></section>
-        <section class="guide-section"><h2>Frequently asked questions</h2>
-          """ + faq_block([
-        ("Should I include my home?", "Include property if you want a full picture; some people track with and without home equity separately."),
-        ("How often should I update?", "Every few months or after major life changes."),
-    ]) + """</section>""" + cta() + """</div>""",
-)
-
-register(
-    "buy-to-let-calculator",
-    title="Buy To Let Calculator",
-    meta="Evaluate rental property using cash flow, ROI and yield estimates.",
-    screenshot=("MoneyMapPulse_Screenshot_BuyToLet_1080x1920.png", "Buy To Let summary in MoneyMap Pulse"),
-    content="""
-      <div class="container">
-        <section class="guide-section"><h2>What this tool does</h2>
-          <p>Estimates rental income, costs, mortgage payments, net cash flow, ROI and gross yield for a buy-to-let property scenario.</p></section>
-        <section class="guide-section"><h2>Why it is useful</h2>
-          <p>Compare property against other uses of your cash and see whether rent covers costs after mortgage and expenses.</p></section>
-        <section class="guide-section"><h2>How to complete the calculator</h2>
-          <ol><li>Open Buy To Let Calculator.</li>
-          <li>Enter purchase price, deposit and mortgage details.</li>
-          <li>Enter expected rent and running costs.</li>
-          <li>Review summary and save if you want to compare later.</li></ol></section>
-        <section class="guide-section"><h2>Input fields explained</h2>
-          <table class="field-table">
-            <tr><th>Purchase price</th><td>Property purchase amount.</td></tr>
-            <tr><th>Deposit / cash invested</th><td>Your equity in the deal.</td></tr>
-            <tr><th>Rental income</th><td>Expected monthly rent.</td></tr>
-            <tr><th>Expenses</th><td>Management, maintenance, insurance, voids allowance, etc.</td></tr>
-            <tr><th>Mortgage payment</th><td>Monthly cost if financed.</td></tr>
-          </table></section>
-        <section class="guide-section"><h2>Worked example</h2>
-          <div class="example-box">
-            <p><strong>Monthly net income:</strong> £362.50</p>
-            <p><strong>Annual net income:</strong> £4,350</p>
-            <p><strong>ROI:</strong> 4.44%</p>
-            <p><strong>Gross yield:</strong> 6.00%</p>
-          </div></section>
-        <section class="guide-section"><h2>Understanding your results</h2>
-          <p><strong>Monthly net income</strong> is rent minus mortgage and expenses. <strong>ROI</strong> relates return to cash invested. <strong>Gross yield</strong> compares annual rent to property price before costs. Use all three together — not in isolation.</p></section>
-        <section class="guide-section"><h2>Frequently asked questions</h2>
-          """ + faq_block([
-        ("Does this include tax?", "Tax on rental income is not personal advice here; speak to a qualified professional for tax."),
-        ("Is void period included?", "Include voids in expenses if the app provides a field or add a conservative allowance."),
-    ]) + """</section>""" + cta() + """</div>""",
-)
+        {cta()}
+      </div>"""
 
 
-def main():
-    for slug, data in GUIDES.items():
-        shot_file, shot_alt = data["screenshot"]
-        hero = hero_img(shot_file, shot_alt)
-        inner = data["content"]
-        body = f'<div class="container guide-hero-wrap">{hero}</div>\n{inner}'
-        html = shell(data["title"], data["meta"], slug, body)
+GUIDES: dict[str, dict[str, Any]] = {
+    "financial-health-snapshot": {
+        "title": "Financial Health Snapshot",
+        "meta": "Learn how the Financial Health Snapshot dashboard brings together savings, net worth, risk profile and retirement readiness.",
+        "screenshot": (
+            "MoneyMapPulse_Screenshot_FinancialSnapshot_1080x1920.png",
+            "Financial Health Snapshot in MoneyMap Pulse",
+        ),
+        "what": "The Financial Health Snapshot is your personal dashboard. It pulls saved results from other calculators into one view so you can see savings, wealth, risk and retirement readiness at a glance.",
+        "visual_title": "Understanding your dashboard",
+        "annotations": [
+            {
+                "title": "Monthly savings",
+                "body": "From the House Budget Calculator. Income minus expenses.",
+                "example": "£1,479 per month",
+            },
+            {
+                "title": "Net worth",
+                "body": "From the Net Worth Calculator. Assets minus liabilities.",
+                "example": "£300,000",
+            },
+            {
+                "title": "Risk profile",
+                "body": "From the Portfolio Return Calculator. Conservative, Balanced or Aggressive.",
+                "example": "Balanced",
+            },
+            {
+                "title": "Retirement status",
+                "body": "From the Retirement Calculator. Displays On track or Shortfall.",
+                "example": "On track",
+            },
+        ],
+        "positions": [(48, 42), (48, 52), (48, 62), (48, 72)],
+        "after_visual": (
+            '<section class="guide-section">'
+            "<h2>How calculators connect</h2>"
+            "<p>Complete calculators in this order to populate your dashboard.</p>"
+            f"{flow_diagram()}</section>"
+        ),
+        "inputs": "<p>You do not type into the snapshot directly. Complete and save the House Budget, Net Worth, Portfolio Return and Retirement calculators first.</p>",
+        "results": "<p><strong>On track</strong> means your projected retirement fund meets or exceeds what you need. <strong>Shortfall</strong> means you may need to adjust savings, retirement age or spending assumptions. Tap a card to open its detail view.</p>",
+        "example": example_box(
+            [
+                "<strong>Monthly savings:</strong> £1,479 (from budget)",
+                "<strong>Net worth:</strong> £300,000",
+                "<strong>Risk profile:</strong> Balanced",
+                "<strong>Retirement:</strong> On track",
+            ]
+        ),
+        "faqs": [
+            ("Why is a dashboard card empty?", "Save results in the linked calculator first. The snapshot only shows saved data."),
+            ("How often should I update my information?", "Review monthly or after any major change to income, spending, assets or retirement plans."),
+            ("Can I use estimated values?", "Yes for planning. Replace estimates with actual figures when you have them."),
+            ("Do I need an account?", "No. Data stays on your device."),
+            ("What should count as retirement income?", "Include pensions, investments and other income you expect in retirement — only if you entered them in the Retirement Calculator."),
+        ],
+    },
+    "house-budget-calculator": {
+        "title": "House Budget Calculator",
+        "meta": "Track household income, expenses and monthly savings with the House Budget Calculator.",
+        "screenshot": ("MoneyMapPulse_Screenshot_Budget_1080x1920.png", "House Budget Calculator in MoneyMap Pulse"),
+        "what": "The House Budget Calculator records household income and spending by category, then shows monthly savings and your savings rate.",
+        "visual_title": "Understanding your budget summary",
+        "annotations": [
+            {"title": "Monthly income", "body": "Total monthly household income.", "example": "£5,000"},
+            {"title": "Monthly expenses", "body": "Total monthly spending.", "example": "£1,980"},
+            {"title": "Monthly balance", "body": "Remaining monthly amount after expenses.", "example": "£3,020"},
+            {"title": "Savings rate", "body": "Percentage of income saved each month.", "example": "60.4%"},
+            {
+                "title": "Expense breakdown",
+                "body": "Shows where spending occurs. Helps identify improvement opportunities.",
+            },
+        ],
+        "positions": [(50, 34), (50, 44), (50, 52), (50, 60), (50, 70)],
+        "inputs": field_table(
+            [
+                ("Income", "Salary, benefits and other money received each month."),
+                ("Expense categories", "Housing, food, transport, bills and discretionary spending."),
+                ("Savings", "Automatically calculated as income minus expenses."),
+            ]
+        ),
+        "results": "<p>Your summary feeds <strong>Monthly savings</strong> on the Financial Health Snapshot. Category totals help you spot areas to adjust.</p>",
+        "example": example_box(
+            [
+                "<strong>Income:</strong> £5,000",
+                "<strong>Expenses:</strong> £1,980",
+                "<strong>Monthly balance:</strong> £3,020",
+                "<strong>Savings rate:</strong> 60.4%",
+            ]
+        ),
+        "faqs": [
+            ("What is a good savings rate?", "Many planners suggest 10–20% as a starting goal, but your target depends on your goals and costs."),
+            ("Should I use net or gross income?", "Use the amount you actually receive if that is how you manage cash flow."),
+            ("Can I use estimated values?", "Yes. Refine categories when you have exact figures."),
+            ("How often should I update my budget?", "Monthly is ideal; at minimum after income or major expense changes."),
+            ("What if my expenses exceed income?", "The calculator will show a negative balance — a signal to review spending or income."),
+        ],
+    },
+    "mortgage-calculator": {
+        "title": "Mortgage Calculator",
+        "meta": "Estimate mortgage payments, interest and loan-to-value with the Mortgage Calculator.",
+        "screenshot": ("MoneyMapPulse_Screenshot_Mortgage_1080x1920.png", "Mortgage Calculator in MoneyMap Pulse"),
+        "what": "Estimates repayment and interest-only payments plus loan-to-value (LTV) from property value, deposit, rate and term.",
+        "visual_title": "Understanding your mortgage results",
+        "annotations": [
+            {"title": "Mortgage amount", "body": "Property value minus deposit."},
+            {"title": "Monthly payment", "body": "Estimated repayment mortgage payment."},
+            {"title": "Interest only", "body": "Monthly interest cost only (not suitable for all products)."},
+            {
+                "title": "Loan to value",
+                "body": "Mortgage amount divided by property value. Higher LTV generally means higher borrowing risk.",
+                "example": "80% LTV",
+            },
+        ],
+        "positions": [(50, 36), (50, 46), (50, 56), (50, 66)],
+        "inputs": field_table(
+            [
+                ("Property value", "Purchase price or current value."),
+                ("Deposit", "Cash you contribute upfront."),
+                ("Interest rate", "Annual rate for illustration."),
+                ("Mortgage term", "Loan length in years."),
+            ]
+        ),
+        "results": "<p>Compare the monthly payment with your House Budget. LTV helps you understand equity — lower LTV often attracts better rates in real lending, but this tool only estimates.</p>",
+        "example": example_box(
+            [
+                "<strong>Property value:</strong> £350,000",
+                "<strong>Deposit:</strong> £70,000",
+                "<strong>Mortgage amount:</strong> £280,000",
+                "<strong>Monthly payment:</strong> See app estimate",
+                "<strong>LTV:</strong> 80%",
+            ]
+        ),
+        "faqs": [
+            ("Is this a mortgage offer?", "No. Figures are for planning only, not lending advice."),
+            ("Does it include fees?", "Add stamp duty, legal fees and insurance separately."),
+            ("Can I use estimated property values?", "Yes for early planning."),
+            ("What is a good LTV?", "Below 80% is common for better rates, but products vary."),
+            ("How often should I recalculate?", "When rates, property value or deposit plans change."),
+        ],
+    },
+    "investment-calculator": {
+        "title": "Investment Calculator",
+        "meta": "Project future investment value from lump sums and monthly contributions.",
+        "screenshot": ("MoneyMapPulse_Screenshot_Investment_1080x1920.png", "Investment Calculator in MoneyMap Pulse"),
+        "what": "Projects how an investment might grow using a starting amount, monthly contributions, expected return and time horizon.",
+        "visual_title": "Understanding your investment projection",
+        "annotations": [
+            {"title": "Initial investment", "body": "Amount invested today.", "example": "£10,000"},
+            {"title": "Monthly contributions", "body": "Regular monthly investing.", "example": "£500"},
+            {"title": "Future value", "body": "Estimated portfolio value at the end of the period.", "example": "£583,242"},
+            {"title": "Investment growth", "body": "Growth generated by investment returns (not guaranteed)."},
+        ],
+        "positions": [(50, 35), (50, 45), (50, 55), (50, 65)],
+        "inputs": field_table(
+            [
+                ("Initial investment", "Lump sum at the start."),
+                ("Monthly contributions", "Regular additions."),
+                ("Expected return", "Annual growth assumption."),
+                ("Time horizon", "Years you stay invested."),
+            ]
+        ),
+        "results": "<p><strong>Future value</strong> is the projected total. <strong>Investment growth</strong> is future value minus what you contributed. Milestone years help you see progress over time.</p>",
+        "example": example_box(
+            [
+                "<strong>Initial:</strong> £10,000",
+                "<strong>Monthly:</strong> £500",
+                "<strong>Return:</strong> 6% per year",
+                "<strong>Horizon:</strong> 16 years",
+                "<strong>Future value:</strong> £583,242 (illustrative)",
+            ]
+        ),
+        "faqs": [
+            ("Will I achieve this return?", "No projection is guaranteed. Markets go up and down."),
+            ("Can I use estimated values?", "Yes — try conservative and optimistic scenarios."),
+            ("Does this include tax?", "Treat results as simplified unless you model tax separately."),
+            ("What return should I assume?", "Many beginners use a modest long-term figure; the Portfolio Return Calculator can help."),
+            ("How often should I update?", "Yearly or when your contribution plan changes."),
+        ],
+    },
+    "portfolio-return-calculator": {
+        "title": "Portfolio Return Calculator",
+        "meta": "Estimate inflation-adjusted returns and choose a risk profile for planning.",
+        "screenshot": (
+            "MoneyMapPulse_Screenshot_PortfolioReturn_1080x1920.png",
+            "Portfolio Return Calculator in MoneyMap Pulse",
+        ),
+        "what": "Explores expected returns and risk levels so retirement and investment assumptions feel realistic.",
+        "visual_title": "Understanding portfolio assumptions",
+        "annotations": [
+            {"title": "Risk profile", "body": "Conservative, Balanced or Aggressive.", "example": "Balanced"},
+            {"title": "Expected return", "body": "Projected annual investment return before inflation."},
+            {"title": "Inflation", "body": "Expected long-term inflation."},
+            {
+                "title": "Real return",
+                "body": "Expected return minus inflation. Real return feeds long-term retirement planning.",
+            },
+        ],
+        "positions": [(50, 36), (50, 46), (50, 56), (50, 66)],
+        "inputs": field_table(
+            [
+                ("Risk profile", "Summary of how much volatility you accept on paper."),
+                ("Asset mix", "Split across cash, bonds and shares where shown."),
+                ("Inflation", "Reduces purchasing power over time."),
+            ]
+        ),
+        "results": "<p>Your selected <strong>risk profile</strong> appears on the Financial Health Snapshot. Use <strong>real return</strong> when judging whether retirement projections are ambitious or cautious.</p>",
+        "example": example_box(
+            [
+                "<strong>Profile:</strong> Balanced",
+                "<strong>Expected return:</strong> 6%",
+                "<strong>Inflation:</strong> 2.5%",
+                "<strong>Real return:</strong> ~3.5% (illustrative)",
+            ]
+        ),
+        "faqs": [
+            ("Is this investment advice?", "No. It is an educational planning aid."),
+            ("Which risk profile should I pick?", "Choose one that matches how much short-term fluctuation you could tolerate."),
+            ("Can I change profile later?", "Yes. Update and refresh your snapshot."),
+            ("Why adjust for inflation?", "Retirement spending in 20 years will not buy the same as today."),
+            ("How often should I review?", "When your goals or comfort with risk changes."),
+        ],
+    },
+    "retirement-calculator": {
+        "title": "Retirement Calculator",
+        "meta": "Review retirement projections, journey checkpoints and whether you are on track.",
+        "screenshot": ("MoneyMapPulse_Screenshot_Retirement_1080x1920.png", "Retirement projection in MoneyMap Pulse"),
+        "what": "Projects your retirement fund, what you will need, journey checkpoints and whether you are on track or facing a shortfall.",
+        "visual_title": "Understanding your retirement journey",
+        "annotations": [
+            {"title": "What you'll have", "body": "Projected retirement fund at your target age.", "example": "£1,092,666"},
+            {"title": "What you'll need", "body": "Required retirement amount based on your assumptions.", "example": "£1,085,649"},
+            {"title": "Retirement journey", "body": "Timeline from today through retirement and later ages."},
+            {"title": "Retirement status", "body": "Shows On track or Shortfall."},
+            {"title": "Checkpoints", "body": "Progress milestones throughout your retirement planning journey."},
+        ],
+        "positions": [(50, 30), (50, 40), (50, 50), (50, 60), (50, 70)],
+        "inputs": field_table(
+            [
+                ("Current savings", "Pensions and investments today."),
+                ("Monthly saving", "Contributions until retirement."),
+                ("Retirement age", "When you plan to retire."),
+                ("Retirement spending", "Monthly income needed in retirement."),
+                ("Return assumption", "Growth rate used in projections."),
+            ]
+        ),
+        "results": "<p><strong>On track</strong> means projected assets meet required fund. <strong>Shortfall</strong> suggests reviewing savings, retirement age or spending. The journey view links today’s habits to retirement and later years.</p>",
+        "example": example_box(
+            [
+                "<strong>What you'll have:</strong> £1,092,666",
+                "<strong>What you'll need:</strong> £1,085,649",
+                "<strong>Status:</strong> On track",
+                "<strong>Ahead by:</strong> £7,017",
+            ]
+        ),
+        "faqs": [
+            ("What should count as retirement income?", "Include workplace pensions, private pensions, investments and other sources you expect."),
+            ("Does this include State Pension?", "Only if you add it in your inputs."),
+            ("Can I use estimated values?", "Yes — refine as you get pension statements."),
+            ("What if I have a shortfall?", "Try higher savings, later retirement or lower spending assumptions in the calculator."),
+            ("How often should I update?", "At least yearly, or after a pay rise, bonus or major life change."),
+        ],
+    },
+    "net-worth-calculator": {
+        "title": "Net Worth Calculator",
+        "meta": "Calculate assets, liabilities and track your net worth over time.",
+        "screenshot": ("MoneyMapPulse_Screenshot_NetWorth_1080x1920.png", "Net Worth Calculator in MoneyMap Pulse"),
+        "what": "Adds up what you own and what you owe, then calculates net worth and optional context such as wealth percentile.",
+        "visual_title": "Understanding your net worth",
+        "annotations": [
+            {"title": "Total assets", "body": "Everything you own.", "example": "£550,000"},
+            {"title": "Total liabilities", "body": "Everything you owe.", "example": "£250,000"},
+            {"title": "Net worth", "body": "Assets minus liabilities.", "example": "£300,000"},
+            {
+                "title": "Wealth percentile",
+                "body": "Estimated position relative to UK households (illustrative context only).",
+            },
+        ],
+        "positions": [(50, 38), (50, 48), (50, 58), (50, 68)],
+        "inputs": field_table(
+            [
+                ("Assets", "Property, savings, investments, pensions, vehicles, etc."),
+                ("Liabilities", "Mortgages, loans and credit balances."),
+                ("Valuations", "Use realistic current values, even if estimated."),
+            ]
+        ),
+        "results": "<p>Net worth feeds your Financial Health Snapshot. Track liquid vs illiquid assets where shown to see what is accessible quickly.</p>",
+        "example": example_box(
+            [
+                "<strong>Assets:</strong> £550,000",
+                "<strong>Liabilities:</strong> £250,000",
+                "<strong>Net worth:</strong> £300,000",
+            ]
+        ),
+        "faqs": [
+            ("What should I include as assets?", "Include major items: home equity, savings, investments and pensions. Skip small household goods unless material."),
+            ("Should I include my home?", "Include it for a full picture, or track a version without property if you prefer."),
+            ("Can I use estimated values?", "Yes. Update when you have formal valuations."),
+            ("How often should I update?", "Every few months or after buying property, paying off debt or large investments."),
+            ("What is wealth percentile?", "A rough comparison for context — not a ranking you need to optimise."),
+        ],
+    },
+    "buy-to-let-calculator": {
+        "title": "Buy To Let Calculator",
+        "meta": "Evaluate rental property using cash flow, ROI and yield estimates.",
+        "screenshot": ("MoneyMapPulse_Screenshot_BuyToLet_1080x1920.png", "Buy To Let summary in MoneyMap Pulse"),
+        "what": "Estimates rent, costs, mortgage, net income, yield and ROI for a rental property scenario.",
+        "visual_title": "Understanding your property investment",
+        "annotations": [
+            {"title": "Property value", "body": "Purchase price of the property."},
+            {"title": "Monthly rent", "body": "Expected rental income each month."},
+            {"title": "Monthly expenses", "body": "Running costs including maintenance and management."},
+            {"title": "Monthly net income", "body": "Monthly profit after costs.", "example": "£362.50"},
+            {"title": "Yield", "body": "Rental return relative to property value.", "example": "6.00% gross"},
+            {"title": "ROI", "body": "Return on invested capital.", "example": "4.44%"},
+        ],
+        "positions": [(50, 32), (50, 42), (50, 50), (50, 58), (50, 66), (50, 74)],
+        "inputs": field_table(
+            [
+                ("Property value", "Price you pay or expect to pay."),
+                ("Deposit / cash invested", "Your equity in the deal."),
+                ("Rent and expenses", "Income and running costs."),
+                ("Mortgage", "Monthly payment if financed."),
+            ]
+        ),
+        "results": "<p>Focus on <strong>monthly net income</strong> for cash flow, <strong>yield</strong> for rent vs price, and <strong>ROI</strong> for return on cash invested. Compare with other uses of the same capital.</p>",
+        "example": example_box(
+            [
+                "<strong>Monthly net income:</strong> £362.50",
+                "<strong>Annual net income:</strong> £4,350",
+                "<strong>ROI:</strong> 4.44%",
+                "<strong>Gross yield:</strong> 6.00%",
+            ]
+        ),
+        "faqs": [
+            ("Does this include tax?", "Rental tax is not advice here — plan separately with a qualified professional."),
+            ("Can I use estimated rent?", "Yes. Use local letting agent guides or conservative figures."),
+            ("What expenses should I include?", "Insurance, maintenance, void periods, agent fees and mortgage interest."),
+            ("Is yield or ROI more important?", "Use both: yield compares rent to price; ROI compares profit to cash you put in."),
+            ("How often should I update?", "When purchase price, rent or mortgage assumptions change."),
+        ],
+    },
+}
+
+
+def main() -> None:
+    for slug, spec in GUIDES.items():
+        body = build_body(spec)
+        html = shell(spec["title"], spec["meta"], slug, body)
         out_dir = ROOT / slug
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "index.html").write_text(html, encoding="utf-8")
