@@ -448,6 +448,168 @@ button:focus-visible {
   margin-inline: auto;
 }
 
+.showcase-copy .more-info {
+  display: inline-flex;
+  margin-top: 20px;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.showcase-copy .more-info:hover {
+  text-decoration: underline;
+}
+
+.showcase-copy .more-info:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Guide / documentation pages */
+.guide-hero-wrap {
+  padding: 8px 0 24px;
+  text-align: center;
+}
+
+.guide-hero-media {
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.guide-hero-media img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.guide-section {
+  padding: 32px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.guide-section:last-of-type {
+  border-bottom: none;
+}
+
+.guide-section h2 {
+  font-size: 1.25rem;
+  margin: 0 0 12px;
+  color: var(--text-dark);
+}
+
+.guide-section p,
+.guide-section li {
+  color: var(--text-secondary);
+}
+
+.guide-section ul,
+.guide-section ol {
+  margin: 0 0 12px;
+  padding-left: 1.25rem;
+}
+
+.guide-section p:last-child {
+  margin-bottom: 0;
+}
+
+.field-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 0.9375rem;
+}
+
+.field-table th,
+.field-table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.field-table th {
+  color: var(--text-dark);
+  font-weight: 600;
+  width: 34%;
+}
+
+.field-table td {
+  color: var(--text-secondary);
+}
+
+.example-box {
+  background: var(--bg-light);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin: 16px 0;
+}
+
+.example-box p {
+  margin: 0 0 8px;
+  color: var(--text-dark);
+}
+
+.example-box p:last-child {
+  margin-bottom: 0;
+}
+
+.source-list {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+}
+
+.source-list li {
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  background: var(--bg-light);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.guide-index-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.guide-index-card {
+  display: block;
+  padding: 20px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-decoration: none;
+  box-shadow: var(--shadow);
+  color: inherit;
+}
+
+.guide-index-card:hover {
+  border-color: var(--primary-light);
+  text-decoration: none;
+}
+
+.guide-index-card h2 {
+  margin: 0 0 8px;
+  font-size: 1.0625rem;
+  color: var(--text-dark);
+}
+
+.guide-index-card p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.guide-cta-block {
+  text-align: center;
+  padding: 40px 0 8px;
+}
+
 .showcase-media {
   margin: 0;
   max-width: 360px;
